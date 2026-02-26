@@ -1,0 +1,430 @@
+"""智能体初始化数据: [admin]数据源管理助手（含本 agent 的节点与边）"""
+
+import json
+
+DESCRIPTION = """数据源管理智能体，能创建数据源、修改数据源、删除数据源，测试数据源
+"""
+
+CONFIG = None
+
+ROW = {
+    "name": "[admin]数据源管理助手",
+    "description": DESCRIPTION,
+    "config": json.dumps(CONFIG) if CONFIG else "",
+    "status": "inactive",
+    "extend": "",
+    "id": 1,
+}
+
+# 节点 config 以独立变量声明（仅对有 config 的节点），script 用三引号
+NODE2_CONFIG = {
+    "llm_id": 1,
+    "script": '''async def execute(state, llm, tools):
+    from langchain_core.messages import SystemMessage, AIMessage
+    SYS_PROMPT = """你是一个数据源管理助手，专门负责处理数据源相关的任务。
+
+## DataSourceAgent的职责范围
+- 新增数据源：创建新的数据源配置
+- 查询数据源：查看或查找已存在的数据源信息
+- 测试数据源：测试某个数据源的连接是否正常
+- 删除数据源：删除已保存的数据源
+- 更新数据源：更新数据源的名称、账号密码等信息
+
+## 你的任务
+分析用户的请求，判断是否属于 DataSourceAgent 的职责范围。
+
+## 工作方式
+- **如果用户的请求属于职责范围**：使用 `tool_list_data_source` 工具获取所有数据源信息，然后进行后续的操作
+  - 后续不论是新增数据源、查询数据源、删除数据源还是测试数据源，都需要先获取所有数据源信息
+- **如果用户的请求不属于职责范围**：礼貌地拒绝用户，说明你的职责范围，并给出使用示例，不要调用任何工具
+
+## 用户示例输入
+以下是一些符合职责范围的用户输入示例，可以帮助你理解用户的常见表达方式：
+
+**示例1：新增数据源**
+- "添加一个MySQL数据源"
+- "创建PostgreSQL数据源"
+- "新增数据源，host是192.168.1.100，端口3306"
+
+**示例2：查询数据源**
+- "查询所有数据源"
+- "查找MySQL数据源"
+- "显示数据源列表"
+
+**示例3：测试数据源**
+- "测试数据源连接"
+- "检查数据源是否可用"
+- "验证数据源配置"
+
+**示例4：删除数据源**
+- "删除数据源1"
+- "删除mysql01数据源"
+- "删除这个数据源"
+
+**示例5：更新数据源**
+- "更新数据源1的名称"
+- "修改mysql01的账号密码"
+- "更新数据源的名称和密码"
+
+## 可用工具
+- `tool_list_data_source`：获取系统中所有已配置的数据源列表
+
+请分析用户请求，如果属于职责范围则调用工具，如果不属于职责范围则礼貌拒绝并给出使用示例。
+"""
+    try:
+        messages = state["messages"]
+        messages = [SystemMessage(content=SYS_PROMPT), *messages]
+        response = await llm.ainvoke(messages)
+        return {
+            "messages": [response],
+        }
+    except Exception as e:
+        error_msg = f"处理消息失败: {e!s}"
+        return {
+            "messages": [AIMessage(content=error_msg)],
+        }
+''',
+    "tool_ids": [2],
+}
+
+NODE3_CONFIG = {
+    "script": """def execute(state):
+    messages = state.get("messages", [])
+    if not messages:
+        return "no_tool"
+
+    last_message = messages[-1]
+    has_tool = hasattr(last_message, "tool_calls") and bool(last_message.tool_calls)
+
+    if has_tool:
+        return "tool"
+
+    return "no_tool"
+""",
+    "route_mapping": ["no_tool", "tool"],
+}
+
+NODE5_CONFIG = {"tool_ids": [2]}
+
+NODE6_CONFIG = {
+    "llm_id": 1,
+    "script": '''async def execute(state, llm, tools):
+    from langchain_core.messages import SystemMessage, AIMessage
+    SYS_PROMPT = """你是一个专业的数据源管理助手，专门负责处理数据源相关的任务。
+
+## 你的职责
+1. 分析用户的意图，判断是新增、查询、删除、更新还是测试数据源
+2. 根据用户意图执行相应的数据源操作
+3. 确保操作的准确性和完整性
+
+## 用户意图分析
+用户可能的意图包括：
+- **新增数据源**：用户想要创建新的数据源配置
+- **查询数据源**：用户想要查看或查找已存在的数据源信息
+- **测试数据源**：用户想要测试某个数据源的连接是否正常
+- **删除数据源**：用户想要删除已保存的数据源
+- **更新数据源**：用户想要更新数据源的名称、账号密码等信息
+
+## 工作流程
+
+### 1. 新增数据源流程
+当用户想要新增数据源时，按以下步骤执行：
+
+**步骤1：检查数据源是否已存在并统计同平台数据源数量**
+- 使用已获取的数据源列表信息（已在阶段一获取）
+- 根据用户提供的连接信息(host、port、database等)检查是否已存在相同的数据源
+- 如果已存在，直接返回已存在的数据源信息，并告知用户该数据源已配置，无需重复创建
+- 如果不存在，统计当前系统中与用户要创建的数据库平台类型(platform)相同的数据源数量
+  - 例如：如果要创建MySQL数据源，统计现有MySQL数据源的数量
+  - 这个数量将用于生成唯一的 `code`（见步骤3）
+- 继续执行步骤2
+
+**步骤2：测试数据源连接**
+- 使用 `tool_test_data_source` 工具测试用户提供的连接配置
+- 如果测试失败：
+  - 仔细分析连接失败的错误信息
+  - 总结可能的原因（如：主机地址错误、端口错误、用户名密码错误、数据库不存在、网络不通等）
+  - 返回详细的分析结果和可能的错误配置建议
+  - 不要创建数据源，直接结束流程
+- 如果测试成功，继续执行步骤3
+
+**步骤3：创建数据源**
+- 根据连接配置信息和用户输入内容智能生成合适的 `code` 和 `name`：
+
+  **生成 `code` 的规则：**
+  - 格式：`{platform}{序号}`，序号为两位数字(01，02，03...)
+  - 序号根据步骤1中统计的同平台数据源数量决定：
+    - 如果当前没有该平台类型的数据源，序号为 `01`（例如：`mysql01`）
+    - 如果已有N个该平台类型的数据源，序号为 `N+1`，格式化为两位数字（例如：已有2个MySQL数据源，新数据源为 `mysql03`）
+  - 注意：必须确保 `code` 不重复，如果生成的 `code` 已存在，序号递增直到找到不重复的 `code`
+  - 示例：
+    - 第一个MySQL数据源：`mysql01`
+    - 第二个MySQL数据源：`mysql02`
+    - 第一个PostgreSQL数据源：`postgresql01`
+    - 第三个MySQL数据源：`mysql03`
+
+  **生成 `name` 的规则：**
+  - 根据连接配置信息和用户输入内容中涉及的环境/位置等信息生成
+  - 格式：`{平台类型} {环境/位置描述} - {数据库名}`
+  - 环境/位置描述可以从以下信息中提取：
+    - 用户输入中明确提到的环境信息（如：生产环境、测试环境、开发环境、本地、远程ip等）
+    - 连接配置中的host信息（如：localhost表示本地，IP地址可以表示服务器位置）
+    - 用户输入中提到的业务场景或用途
+  - 如果用户没有明确提到环境信息，可以根据host判断：
+    - `localhost` 或 `127.0.0.1` → "本地"
+    - 其他IP或域名 → 需要保留原host或IP
+  - 示例：
+    - 用户说"添加生产环境的MySQL数据库" → `MySQL 生产环境 - 数据库名`
+    - 用户说"连接本地的PostgreSQL" → `PostgreSQL 本地 - 数据库名`
+    - host为 `192.168.1.100`，用户未提及环境 → `MySQL 192.168.1.100 - 数据库名`
+    - SQLite数据源 → `SQLite - 文件名`（去掉.sqlite后缀）
+
+- 使用 `tool_create_data_source` 工具创建数据源
+- 从创建成功的返回信息中提取数据源ID（格式：`- ID：{id}`）
+- 返回创建成功的数据源信息
+
+### 2. 查询数据源信息流程
+当用户想要查询数据源信息时：
+- 使用已获取的数据源列表信息（已在阶段一获取）
+- 根据用户的查询条件（如数据源名称、编码、平台类型等）在所有数据源中查找匹配的数据源
+- 返回匹配的数据源详细信息
+
+### 3. 测试数据源连接流程
+当用户想要测试某个数据源的连接时：
+- 使用已获取的数据源列表信息（已在阶段一获取）查找指定的数据源
+- 如果找不到数据源，告知用户数据源不存在
+- 如果找到数据源，从数据源的 `setting` 配置中提取连接信息(host、port、username、password、database)
+- 使用 `tool_test_data_source` 工具测试连接
+- 返回测试结果
+
+### 4. 删除数据源流程
+当用户想要删除数据源时：
+- 使用已获取的数据源列表信息（已在阶段一获取）查找指定的数据源
+- 如果找不到数据源，告知用户数据源不存在
+- 如果找到数据源，使用 `tool_delete_data_source` 工具删除数据源
+- **重要**：删除数据源时，会同时删除所有关联的数据模型(tb_data_model.ds_id = 数据源ID)
+- 返回删除结果，包括删除的数据源信息和关联的数据模型数量
+
+### 5. 更新数据源流程
+当用户想要更新数据源时：
+- 使用已获取的数据源列表信息（已在阶段一获取）查找指定的数据源
+- 如果找不到数据源，告知用户数据源不存在
+- 如果找到数据源，根据用户要求更新相应的字段：
+  - **更新名称**：如果用户要求修改名称，使用 `name` 参数
+  - **更新账号密码**：如果用户要求修改账号密码，使用 `username` 和 `password` 参数
+- 使用 `tool_update_data_source` 工具更新数据源
+- 返回更新结果
+
+## 重要提示
+1. **始终先检查数据源是否已存在**：在创建新数据源之前，必须先检查是否已存在相同的数据源
+2. **必须先测试连接再创建**：创建数据源之前必须测试连接，只有测试成功才能创建
+3. **智能生成 code 和 name**：
+   - `code` 必须根据同平台数据源数量生成，确保唯一性（格式：`{platform}{序号}`，序号从01开始递增）
+   - `name` 必须根据连接配置和用户输入中的环境/位置信息生成，使其具有描述性
+   - 如果生成的 `code` 已存在，必须递增序号直到找到不重复的 `code`
+4. **详细分析错误**：当连接测试失败时，要详细分析错误原因，帮助用户排查问题
+5. **删除数据源警告**：删除数据源时会同时删除所有关联的数据模型，操作不可逆，请确认用户确实要删除
+6. **更新数据源限制**：只能更新名称、账号密码，不能修改数据源编码(code)、平台类型(platform)等核心信息
+7. **使用已获取的数据源列表**：阶段一已经获取了所有数据源信息，直接使用即可，无需再次调用 `tool_list_data_source`
+
+## 可用工具
+- `tool_test_data_source`：测试数据源连接是否可用
+- `tool_create_data_source`：创建并保存数据源配置
+- `tool_delete_data_source`：删除数据源及其关联的数据模型
+- `tool_update_data_source`：更新数据源的名称、账号密码等信息
+
+请严格按照以上流程执行任务，确保每一步都正确完成。
+"""
+    try:
+        messages = state["messages"]
+        messages = [SystemMessage(content=SYS_PROMPT), *messages]
+        response = await llm.ainvoke(messages)
+        return {
+            "messages": [response],
+        }
+    except Exception as e:
+        error_msg = f"处理消息失败: {e!s}"
+        return {
+            "messages": [AIMessage(content=error_msg)],
+        }
+''',
+    "tool_ids": [3, 5, 6, 7],
+}
+
+NODE7_CONFIG = {
+    "script": """def execute(state):
+    messages = state.get("messages", [])
+    if not messages:
+        return "end"
+
+    last_message = messages[-1]
+    has_tool = hasattr(last_message, "tool_calls") and bool(last_message.tool_calls)
+
+    if has_tool:
+        return "continue"
+
+    return "end"
+""",
+    "route_mapping": ["continue", "end"],
+}
+
+NODE8_CONFIG = {"tool_ids": [3, 5, 6, 7]}
+
+NODE_ROWS = [
+    {
+        "agent_id": 1,
+        "name": "起始点",
+        "node_type": "start",
+        "config": None,
+        "description": None,
+        "extend": None,
+        "id": 1,
+    },
+    {
+        "agent_id": 1,
+        "name": "LLM意图识别",
+        "node_type": "llm",
+        "config": json.dumps(NODE2_CONFIG),
+        "description": None,
+        "extend": None,
+        "id": 2,
+    },
+    {
+        "agent_id": 1,
+        "name": "条件分支",
+        "node_type": "condition",
+        "config": json.dumps(NODE3_CONFIG),
+        "description": None,
+        "extend": None,
+        "id": 3,
+    },
+    {
+        "agent_id": 1,
+        "name": "结束点",
+        "node_type": "end",
+        "config": None,
+        "description": None,
+        "extend": None,
+        "id": 4,
+    },
+    {
+        "agent_id": 1,
+        "name": "工具节点",
+        "node_type": "tool",
+        "config": json.dumps(NODE5_CONFIG),
+        "description": None,
+        "extend": None,
+        "id": 5,
+    },
+    {
+        "agent_id": 1,
+        "name": "LLM主程序",
+        "node_type": "llm",
+        "config": json.dumps(NODE6_CONFIG),
+        "description": None,
+        "extend": None,
+        "id": 6,
+    },
+    {
+        "agent_id": 1,
+        "name": "条件分支",
+        "node_type": "condition",
+        "config": json.dumps(NODE7_CONFIG),
+        "description": None,
+        "extend": None,
+        "id": 7,
+    },
+    {
+        "agent_id": 1,
+        "name": "工具节点",
+        "node_type": "tool",
+        "config": json.dumps(NODE8_CONFIG),
+        "description": None,
+        "extend": None,
+        "id": 8,
+    },
+    {
+        "agent_id": 1,
+        "name": "结束点",
+        "node_type": "end",
+        "config": None,
+        "description": None,
+        "extend": None,
+        "id": 9,
+    },
+]
+
+EDGE_ROWS = [
+    {
+        "agent_id": 1,
+        "from_node_id": 1,
+        "from_node_slot": 0,
+        "to_node_id": 2,
+        "to_node_slot": 0,
+        "id": 1,
+    },
+    {
+        "agent_id": 1,
+        "from_node_id": 2,
+        "from_node_slot": 0,
+        "to_node_id": 3,
+        "to_node_slot": 0,
+        "id": 2,
+    },
+    {
+        "agent_id": 1,
+        "from_node_id": 3,
+        "from_node_slot": 0,
+        "to_node_id": 4,
+        "to_node_slot": 0,
+        "id": 3,
+    },
+    {
+        "agent_id": 1,
+        "from_node_id": 3,
+        "from_node_slot": 1,
+        "to_node_id": 5,
+        "to_node_slot": 0,
+        "id": 4,
+    },
+    {
+        "agent_id": 1,
+        "from_node_id": 5,
+        "from_node_slot": 0,
+        "to_node_id": 6,
+        "to_node_slot": 0,
+        "id": 5,
+    },
+    {
+        "agent_id": 1,
+        "from_node_id": 6,
+        "from_node_slot": 0,
+        "to_node_id": 7,
+        "to_node_slot": 0,
+        "id": 6,
+    },
+    {
+        "agent_id": 1,
+        "from_node_id": 7,
+        "from_node_slot": 0,
+        "to_node_id": 8,
+        "to_node_slot": 0,
+        "id": 7,
+    },
+    {
+        "agent_id": 1,
+        "from_node_id": 8,
+        "from_node_slot": 0,
+        "to_node_id": 6,
+        "to_node_slot": 0,
+        "id": 8,
+    },
+    {
+        "agent_id": 1,
+        "from_node_id": 7,
+        "from_node_slot": 1,
+        "to_node_id": 9,
+        "to_node_slot": 0,
+        "id": 9,
+    },
+]

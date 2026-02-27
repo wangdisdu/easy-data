@@ -36,7 +36,7 @@ class BaseAgent(ABC):
             init_kwargs = {
                 "base_url": settings.OPENAI_BASE_URL,
                 "api_key": settings.OPENAI_API_KEY,
-                "model": "qwen-max",
+                "model": settings.OPENAI_MODEL,
                 "streaming": True,
             }
             self.llm = ChatOpenAI(**init_kwargs)

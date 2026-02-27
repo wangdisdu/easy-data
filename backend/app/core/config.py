@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     # LLM配置
     OPENAI_API_KEY: str = ""
     OPENAI_BASE_URL: str = "https://api.openai.com/v1"
+    OPENAI_MODEL: str = ""
 
     # LangSmith配置
     LANGSMITH_TRACING: bool = False

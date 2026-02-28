@@ -52,6 +52,7 @@
             <a-select-option value="bailian">阿里云百炼</a-select-option>
             <a-select-option value="bigmodel">智谱模型</a-select-option>
             <a-select-option value="volcengine">火山引擎</a-select-option>
+            <a-select-option value="siliconflow">硅基流动</a-select-option>
           </a-select>
         </a-form-item>
         <a-form-item name="api_key" label="API密钥">
@@ -159,6 +160,7 @@ const handleProviderChange = () => {
     bailian: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
     bigmodel: 'https://open.bigmodel.cn/api/paas/v4',
     volcengine: 'https://ark.cn-beijing.volces.com/api/v3',
+    siliconflow: 'https://api.siliconflow.cn/v1',
   }
   if (defaultUrls[form.provider] && !form.base_url) {
     form.base_url = defaultUrls[form.provider]

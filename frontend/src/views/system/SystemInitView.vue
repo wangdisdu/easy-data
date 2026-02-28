@@ -26,6 +26,7 @@
                 <a-select-option value="bailian">阿里云百炼</a-select-option>
                 <a-select-option value="bigmodel">智谱模型</a-select-option>
                 <a-select-option value="volcengine">火山引擎</a-select-option>
+                <a-select-option value="siliconflow">硅基流动</a-select-option>
               </a-select>
             </a-form-item>
 
@@ -78,8 +79,14 @@
             </li>
             <li>
               <span>火山引擎百炼：</span>
-              <a href="https://console.volcengine.com/" target="_blank" rel="noopener noreferrer">
+              <a href="https://console.volcengine.com" target="_blank" rel="noopener noreferrer">
                 https://console.volcengine.com
+              </a>
+            </li>
+            <li>
+              <span>硅基流动：</span>
+              <a href="https://cloud.siliconflow.cn" target="_blank" rel="noopener noreferrer">
+                https://cloud.siliconflow.cn
               </a>
             </li>
           </ul>
@@ -125,6 +132,7 @@ const defaultUrls: Record<string, string> = {
   bailian: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
   bigmodel: 'https://open.bigmodel.cn/api/paas/v4',
   volcengine: 'https://ark.cn-beijing.volces.com/api/v3',
+  siliconflow: 'https://api.siliconflow.cn/v1',
 }
 
 const handleProviderChange = () => {

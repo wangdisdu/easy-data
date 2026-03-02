@@ -1,0 +1,1 @@
+import{ay as e}from"./index-CP9a24iS.js";const a=t=>e.get("/agents",{params:t}),g=t=>e.get(`/agents/${t}`),r=t=>e.post("/agents",t),o=(t,n)=>e.put(`/agents/${t}`,n),c=t=>e.delete(`/agents/${t}`),p=t=>e.get(`/agents/${t}/graph`),u=(t,n)=>e.post(`/agents/${t}/graph`,n);export{g as a,p as b,r as c,c as d,a as g,u as s,o as u};

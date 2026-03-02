@@ -1,0 +1,1 @@
+import{ay as t}from"./index-CP9a24iS.js";const r=o=>t.get("/tools",{params:o}),l=o=>t.get(`/tools/${o}`),a=o=>t.post("/tools",o),n=(o,e)=>t.put(`/tools/${o}`,e),c=o=>t.delete(`/tools/${o}`);export{l as a,a as c,c as d,r as g,n as u};

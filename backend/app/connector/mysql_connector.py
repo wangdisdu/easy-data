@@ -38,14 +38,16 @@ class MySQLConnector(BaseConnector):
             database: 要连接的数据库名称，默认为当前连接的数据库
         """
         if not self.connection or not self.connection.open:
-            self.connection = pymysql.connect(
-                host=self.host,
-                port=int(self.port),
-                user=self.username,
-                password=self.password,
-                database=database or self.database,
+            connect_params = {
+                "host": self.host,
+                "port": int(self.port),
+                "user": self.username,
+                "password": self.password,
+                "database": database or self.database,
+                "ssl": False,  # 默认不启用 SSL，可通过 extra_params 覆盖
                 **self.extra_params,
-            )
+            }
+            self.connection = pymysql.connect(**connect_params)
 
     def test_connection(self) -> ConnectionTestResult:
         """

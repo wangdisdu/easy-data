@@ -46,7 +46,7 @@ CONTENT = """def tool_delete_data_models_by_data_source(ds_id_or_code: str) -> s
     from app.dao.database import SessionLocal
     from app.dao.models import TbDataSource
     from app.dao.models import TbDataModel
-    from app.services.data_models_service import DataModelService
+    from app.service.data_model_service import DataModelService
     db = SessionLocal()
     try:
         if ds_id_or_code.isdigit():

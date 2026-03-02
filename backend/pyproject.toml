@@ -41,11 +41,12 @@ dependencies = [
     "bcrypt==4.0.1",
     "python-multipart==0.0.12",
     # AI Agent相关
-    "langchain==1.2.0",
+    "langchain-core==1.2.16",
+    "langchain==1.2.10",
     "langchain-openai==1.1.5",
-    "langchain-core==1.2.2",
-    "langgraph==1.0.5",
-    "langsmith==0.5.0",
+    "langgraph==1.0.10",
+    "langsmith==0.7.9",
+    "deepagents==0.4.4",
     # 向量数据库
     "pymilvus==2.4.0",
     # 工具类
@@ -61,13 +62,13 @@ dependencies = [
 [project.optional-dependencies]
 oracle = ["cx-oracle==8.3.0"]
 dev = [
-    "black>=24.0.0",
-    "isort>=5.13.0",
-    "ruff>=0.4.0",
-    "mypy>=1.8.0",
-    "pytest>=8.0.0",
-    "pytest-asyncio>=0.23.0",
-    "pytest-cov>=4.1.0",
+    "black==24.10.0",
+    "isort==5.13.2",
+    "ruff==0.8.0",
+    "mypy==1.13.0",
+    "pytest==8.3.4",
+    "pytest-asyncio==0.24.0",
+    "pytest-cov==6.0.0",
 ]
 
 [project.scripts]
@@ -186,7 +187,6 @@ ignore = [
     "RUF002", # 禁止检查中文标点符号（docstring中的）
     "RUF003", # 禁止检查中文字符（代码注释中的）
     "UP007",  # 禁用将 Union[T, U] 自动升级为 T | U，保持使用 Union 语法
-    "UP045",  # 禁用将 Optional[T] 自动升级为 T | None，保持使用 Optional[T] 语法
     "B008",  # do not perform function calls in argument defaults
     "ARG001",
     "ARG002",
@@ -239,6 +239,7 @@ module = [
     "langchain_core.*",
     "langgraph.*",
     "langsmith.*",
+    "deepagents.*",
     "pymilvus.*",
     "cx_Oracle.*",
     "clickhouse_connect.*",

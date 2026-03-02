@@ -94,8 +94,8 @@ CONTENT = """def tool_create_data_source(
 ) -> str:
     import json
     from app.dao.database import SessionLocal
-    from app.services.data_sources_service import DataSourceCreate
-    from app.services.data_sources_service import DataSourceService
+    from app.service.data_source_service import DataSourceCreate
+    from app.service.data_source_service import DataSourceService
     db = SessionLocal()
     try:
         # 构建数据库配置

@@ -14,7 +14,7 @@ from app.agent.base_agent import BaseAgent
 from app.core.biz_error import BizError
 from app.core.logging import get_logger
 from app.dao.database import SessionLocal
-from app.services.auth_service import AuthService
+from app.service.auth_service import AuthService
 
 logger = get_logger("chat")
 

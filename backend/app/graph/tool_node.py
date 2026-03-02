@@ -13,8 +13,8 @@ from sqlalchemy.orm import Session
 from app.core.biz_error import BizError, BizErrorCode
 from app.core.logging import get_logger
 from app.dao.models import TbTool
-from app.services.agents_service import AgentGraphNodeModel, ToolNodeConfig
-from app.services.tools_service import ToolService
+from app.service.agent_service import AgentGraphNodeModel, ToolNodeConfig
+from app.service.tool_service import ToolService
 
 logger = get_logger(__name__)
 

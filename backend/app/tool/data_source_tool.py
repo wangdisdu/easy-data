@@ -15,11 +15,7 @@ from app.core.json_utils import json_dumps, normalize_query_results
 from app.core.logging import get_logger
 from app.dao.database import SessionLocal
 from app.dao.models import TbDataModel, TbDataSource
-from app.services.data_sources_service import (
-    DataSourceCreate,
-    DataSourceService,
-    DataSourceUpdate,
-)
+from app.service.data_source_service import DataSourceCreate, DataSourceService, DataSourceUpdate
 from app.tool.data_source_template import DATA_SOURCES_TEMPLATE
 from app.tool.tool_utils import format_tool_params
 

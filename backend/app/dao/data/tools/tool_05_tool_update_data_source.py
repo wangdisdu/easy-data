@@ -68,8 +68,8 @@ CONTENT = """def tool_update_data_source(
     import json
     from app.dao.database import SessionLocal
     from app.dao.models import TbDataSource
-    from app.services.data_sources_service import DataSourceUpdate
-    from app.services.data_sources_service import DataSourceService
+    from app.service.data_source_service import DataSourceUpdate
+    from app.service.data_source_service import DataSourceService
     db = SessionLocal()
     try:
         # 检查是否提供了至少一个更新字段

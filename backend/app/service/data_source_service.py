@@ -14,7 +14,7 @@ from app.connector.models import ConnectionTestResult
 from app.core.biz_error import BizError, BizErrorCode
 from app.core.logging import get_logger
 from app.dao.models import TbDataModel, TbDataSource
-from app.services.workspace_relation_service import WorkSpaceRelationService
+from app.service.workspace_relation_service import WorkSpaceRelationService
 
 logger = get_logger(__name__)
 

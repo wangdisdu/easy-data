@@ -30,8 +30,8 @@ CONTENT = """def tool_update_data_model_semantic_and_summary(
     import json
     from app.dao.database import SessionLocal
     from app.dao.models import TbDataModel
-    from app.services.data_models_service import DataModelService
-    from app.services.data_models_service import DataModelUpdate
+    from app.service.data_model_service import DataModelService
+    from app.service.data_model_service import DataModelUpdate
     db = SessionLocal()
     try:
         if dm_id_or_code.isdigit():

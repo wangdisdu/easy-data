@@ -12,23 +12,9 @@ import time
 
 from app.core.logging import get_logger
 from app.core.security import get_password_hash
-from app.dao.data import (
-    AGENT_EDGE_ROWS,
-    AGENT_NODE_ROWS,
-    AGENT_ROWS,
-    LLM_ROWS,
-    TOOL_ROWS,
-)
+from app.dao.data import AGENT_EDGE_ROWS, AGENT_NODE_ROWS, AGENT_ROWS, LLM_ROWS, TOOL_ROWS
 from app.dao.database import SessionLocal
-from app.dao.models import (
-    TbAgent,
-    TbAgentEdge,
-    TbAgentNode,
-    TbLlm,
-    TbTool,
-    TbUser,
-    TbWorkSpace,
-)
+from app.dao.models import TbAgent, TbAgentEdge, TbAgentNode, TbLlm, TbTool, TbUser, TbWorkSpace
 
 logger = get_logger("init_db")
 

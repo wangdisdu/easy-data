@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.api.auth import get_current_user
 from app.core.models import Resp
 from app.dao.database import get_db
-from app.services.llm_service import LlmService, LlmUpdate
+from app.service.llm_service import LlmService, LlmUpdate
 
 router = APIRouter()
 

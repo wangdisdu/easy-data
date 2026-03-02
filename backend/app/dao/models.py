@@ -65,7 +65,7 @@ class TbDataModel(BaseModel):
     code = Column(String(255), unique=True, nullable=False, comment="唯一编码")
     name = Column(String(255), nullable=False, comment="模型名称")
     platform = Column(String(255), nullable=False, comment="数据库类型")
-    type = Column(String(50), nullable=True, comment="模型类型:table,view")
+    type = Column(String(255), nullable=True, comment="模型类型:table,view")
     ds_id = Column(Integer, nullable=True, comment="所属数据源ID")
     semantic = Column(Text, nullable=True, comment="语义说明")
     summary = Column(Text, nullable=True, comment="摘要说明")
@@ -80,7 +80,7 @@ class TbWorkSpaceRelation(BaseModel):
     __tablename__ = "tb_work_space_relation"
 
     ws_id = Column(Integer, nullable=False, comment="工作空间ID")
-    resource_type = Column(String(50), nullable=False, comment="资源类型:data_source,data_model等")
+    resource_type = Column(String(255), nullable=False, comment="资源类型:data_source,data_model等")
     resource_id = Column(Integer, nullable=False, comment="资源ID")
 
 
@@ -89,9 +89,9 @@ class TbLlm(BaseModel):
 
     __tablename__ = "tb_llm"
 
-    provider = Column(String(50), nullable=False, comment="模型提供商")
-    api_key = Column(Text, nullable=True, comment="API密钥")
-    base_url = Column(String(512), nullable=True, comment="API基础URL")
+    provider = Column(String(255), nullable=False, comment="模型提供商")
+    api_key = Column(String(255), nullable=True, comment="API密钥")
+    base_url = Column(String(255), nullable=True, comment="API基础URL")
     model = Column(String(255), nullable=False, comment="模型名称")
     setting = Column(Text, nullable=True, comment="其他配置信息")
     description = Column(Text, nullable=True, comment="描述信息")
@@ -106,7 +106,7 @@ class TbAgent(BaseModel):
     name = Column(String(255), nullable=False, comment="智能体名称")
     description = Column(Text, nullable=True, comment="智能体描述")
     config = Column(Text, nullable=True, comment="智能体配置信息（JSON格式）")
-    status = Column(String(50), nullable=False, default="active", comment="状态:active,inactive")
+    status = Column(String(255), nullable=False, default="active", comment="状态:active,inactive")
     extend = Column(Text, nullable=True, comment="扩展信息")
 
 
@@ -118,7 +118,7 @@ class TbAgentNode(BaseModel):
     agent_id = Column(Integer, nullable=False, comment="智能体ID")
     name = Column(String(255), nullable=True, comment="节点名称")
     node_type = Column(
-        String(50), nullable=False, comment="节点类型:start,end,llm,tool,python,subgraph"
+        String(255), nullable=False, comment="节点类型:start,end,llm,tool,python,subgraph"
     )
     config = Column(Text, nullable=True, comment="节点配置信息")
     description = Column(Text, nullable=True, comment="节点描述")
@@ -138,7 +138,7 @@ class TbAgentEdge(BaseModel):
 
 
 class TbTool(BaseModel):
-    """工具表，保存@tool到数据库"""
+    """工具表"""
 
     __tablename__ = "tb_tool"
 
@@ -147,3 +147,31 @@ class TbTool(BaseModel):
     parameters = Column(Text, nullable=True, comment="工具参数定义")
     content = Column(Text, nullable=True, comment="工具代码内容")
     extend = Column(Text, nullable=True, comment="扩展信息")
+
+
+class TbJob(BaseModel):
+    """作业表"""
+
+    __tablename__ = "tb_job"
+
+    type = Column(String(255), nullable=False, comment="作业类型: agent 等")
+    status = Column(
+        String(255),
+        nullable=False,
+        default="waiting",
+        comment="状态: waiting,running,stopped,success,failed",
+    )
+    setting = Column(Text, nullable=True, comment="配置(JSON)")
+    description = Column(Text, nullable=True, comment="作业描述")
+    extend = Column(Text, nullable=True, comment="扩展信息")
+    begin_time = Column(BigInteger, nullable=True, comment="开始时间")
+    end_time = Column(BigInteger, nullable=True, comment="结束时间")
+
+
+class TbJobLog(BaseModel):
+    """作业日志表"""
+
+    __tablename__ = "tb_job_log"
+
+    job_id = Column(Integer, nullable=False, comment="作业ID")
+    content = Column(Text, nullable=False, comment="日志内容")

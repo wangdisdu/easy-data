@@ -84,6 +84,11 @@ const router = createRouter({
           name: 'admin-llms',
           component: () => import('@/views/admin/llm/LlmView.vue'),
         },
+        {
+          path: 'jobs',
+          name: 'admin-jobs',
+          component: () => import('@/views/admin/job/JobListView.vue'),
+        },
       ],
     },
   ],

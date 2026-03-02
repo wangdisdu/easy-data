@@ -13,3 +13,6 @@ docker-run:
 docker-stop:
 	docker stop easy-data 2>/dev/null || true
 	docker rm easy-data 2>/dev/null || true
+
+docker-clean:
+	docker rmi $(IMAGE_NAME):$(IMAGE_TAG) 2>/dev/null || true

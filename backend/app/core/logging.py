@@ -59,6 +59,11 @@ logger.addHandler(error_file_handler)
 # 防止日志传播到根日志记录器
 logger.propagate = False
 
+# 降低 SQLAlchemy engine/pool 日志量，避免刷屏影响排障（仅 WARNING 及以上输出）
+for _name in ("sqlalchemy.engine", "sqlalchemy.pool", "sqlalchemy.dialects"):
+    _sql_logger = logging.getLogger(_name)
+    _sql_logger.setLevel(logging.WARNING)
+
 
 def get_logger(name: Optional[str] = None) -> logging.Logger:
     """

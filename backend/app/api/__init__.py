@@ -4,7 +4,19 @@ API路由
 
 from fastapi import APIRouter
 
-from app.api import agents, auth, chat, data_models, data_sources, llm, system, tools, users, workspaces
+from app.api import (
+    agents,
+    auth,
+    chat,
+    data_models,
+    data_sources,
+    jobs,
+    llm,
+    system,
+    tools,
+    users,
+    workspaces,
+)
 
 api_router = APIRouter()
 
@@ -17,4 +29,5 @@ api_router.include_router(data_models.router, tags=["数据模型"])
 api_router.include_router(agents.router, tags=["智能体管理"])
 api_router.include_router(tools.router, tags=["工具管理"])
 api_router.include_router(llm.router, tags=["LLM模型管理"])
+api_router.include_router(jobs.router, tags=["作业管理"])
 api_router.include_router(system.router, tags=["系统"])

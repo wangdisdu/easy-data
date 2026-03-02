@@ -4,7 +4,7 @@ Start 节点 Builder
 
 from langgraph.graph import StateGraph
 
-from app.services.agents_service import AgentGraphNodeModel
+from app.service.agent_service import AgentGraphNodeModel
 
 
 def build_start_node(node: AgentGraphNodeModel, node_name: str, workflow: StateGraph) -> None:

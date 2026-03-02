@@ -10,7 +10,7 @@ from app.core.biz_error import BizError, BizErrorCode
 from app.core.logging import get_logger
 from app.core.models import PagedResp, Resp
 from app.dao.database import get_db
-from app.services.agents_service import (
+from app.service.agent_service import (
     AgentCreate,
     AgentGraphModel,
     AgentResponse,

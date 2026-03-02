@@ -24,7 +24,7 @@ from app.graph import (
     build_start_node,
     build_tool_node,
 )
-from app.services.agents_service import (
+from app.service.agent_service import (
     AgentGraphModel,
     AgentGraphNodeModel,
     AgentService,

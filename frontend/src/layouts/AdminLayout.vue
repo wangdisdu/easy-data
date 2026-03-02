@@ -78,6 +78,7 @@ import {
   ApiOutlined,
   SettingOutlined,
   AppstoreOutlined,
+  ScheduleOutlined,
 } from '@ant-design/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import type { MenuProps } from 'ant-design-vue'
@@ -136,6 +137,18 @@ const menuItems: MenuProps['items'] = [
     ],
   },
   {
+    key: 'job',
+    icon: () => h(ScheduleOutlined),
+    label: '作业管理',
+    children: [
+      {
+        key: '/admin/jobs',
+        icon: () => h(ScheduleOutlined),
+        label: '作业列表',
+      },
+    ],
+  },
+  {
     key: 'system',
     icon: () => h(SettingOutlined),
     label: '系统管理',
@@ -176,6 +189,9 @@ const getParentMenuKey = (path: string): string | null => {
   }
   if (path.startsWith('/admin/data-sources') || path.startsWith('/admin/data-models') || path.startsWith('/admin/data-query')) {
     return 'data-modeling'
+  }
+  if (path.startsWith('/admin/jobs')) {
+    return 'job'
   }
   if (path.startsWith('/admin/workspaces') || path.startsWith('/admin/users')) {
     return 'system'

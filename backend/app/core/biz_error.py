@@ -50,6 +50,9 @@ class BizErrorCode:
     LLM_NOT_EXIST = 1800
     LLM_DELETE_ERROR = 1801
 
+    # 作业相关错误 1900-1999
+    JOB_NOT_EXIST = 1900
+
 
 class BizError(Exception):
     """业务异常类"""

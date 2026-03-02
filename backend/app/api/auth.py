@@ -11,8 +11,8 @@ from app.core.logging import get_logger
 from app.core.models import Resp
 from app.dao.database import get_db
 from app.dao.models import TbUser
-from app.services.auth_service import AuthService, Token, UserCreate
-from app.services.users_service import UserResponse
+from app.service.auth_service import AuthService, Token, UserCreate
+from app.service.user_service import UserResponse
 
 logger = get_logger("auth")
 

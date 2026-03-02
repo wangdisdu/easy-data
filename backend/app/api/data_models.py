@@ -9,7 +9,7 @@ from app.api.auth import get_current_user
 from app.core.biz_error import BizError, BizErrorCode
 from app.core.models import PagedResp, Resp
 from app.dao.database import get_db
-from app.services.data_models_service import (
+from app.service.data_model_service import (
     DataModelCreate,
     DataModelResponse,
     DataModelService,

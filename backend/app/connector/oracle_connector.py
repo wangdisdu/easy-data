@@ -12,6 +12,8 @@ from app.core.logging import get_logger
 
 logger = get_logger(__name__)
 
+_ORACLE_REQUIRED_MSG = "Oracle 支持需要安装 cx-oracle 依赖，请执行: pip install -e '.[oracle]'"
+
 
 class OracleConnector(BaseConnector):
     """
@@ -38,9 +40,7 @@ class OracleConnector(BaseConnector):
             database: 要连接的数据库名称(service_name)，默认为当前连接的数据库
         """
         if cx_Oracle is None:
-            raise RuntimeError(
-                "Oracle 支持需要安装 cx-oracle 依赖，请执行: pip install -e '.[oracle]'"
-            )
+            raise RuntimeError(_ORACLE_REQUIRED_MSG)
         if not self.connection or not self.connection.is_connected():
             # 构建DSN (Data Source Name)
             dsn = cx_Oracle.makedsn(

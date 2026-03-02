@@ -12,7 +12,7 @@ from app.connector.models import ConnectionTestResult
 from app.core.biz_error import BizError, BizErrorCode
 from app.core.models import PagedResp, Resp
 from app.dao.database import get_db
-from app.services.data_sources_service import (
+from app.service.data_source_service import (
     DataSourceCreate,
     DataSourceResponse,
     DataSourceService,

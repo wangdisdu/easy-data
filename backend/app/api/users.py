@@ -10,7 +10,7 @@ from app.core.biz_error import BizError, BizErrorCode
 from app.core.models import PagedResp, Resp
 from app.dao.database import get_db
 from app.dao.models import TbUser
-from app.services.users_service import UserResponse, UserService, UserUpdate
+from app.service.user_service import UserResponse, UserService, UserUpdate
 
 router = APIRouter()
 

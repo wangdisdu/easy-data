@@ -19,6 +19,7 @@
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'action'">
           <a-space>
+            <a-button type="link" @click="handleScan(record)">扫描</a-button>
             <a-button type="link" @click="handleEdit(record)">编辑</a-button>
             <a-popconfirm title="确定要删除吗？" @confirm="handleDelete(record.id)">
               <a-button type="link" danger>删除</a-button>
@@ -104,6 +105,33 @@
         </a-form-item>
       </a-form>
     </a-modal>
+
+    <!-- 扫描弹窗 -->
+    <a-modal
+      v-model:open="scanModalVisible"
+      :title="scanModalTitle"
+      @ok="handleScanConfirm"
+      :confirm-loading="scanSubmitLoading"
+      width="560px"
+    >
+      <a-form layout="vertical">
+        <a-form-item label="智能体" required>
+          <a-select
+            v-model:value="scanForm.agent_id"
+            placeholder="请选择智能体"
+            :options="agentOptions.map((a) => ({ label: a.name, value: a.id }))"
+            style="width: 100%"
+          />
+        </a-form-item>
+        <a-form-item label="输入描述">
+          <a-textarea
+            v-model:value="scanForm.input"
+            :rows="4"
+            placeholder="执行任务的输入描述"
+          />
+        </a-form-item>
+      </a-form>
+    </a-modal>
   </div>
 </template>
 
@@ -112,9 +140,12 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
 import { PlusOutlined } from '@ant-design/icons-vue'
 import type { DataModel } from '@/api/dataModel'
+import type { Agent } from '@/api/agent'
 import { getDataModels, createDataModel, updateDataModel, deleteDataModel, getDataModel } from '@/api/dataModel'
 import { getDataSources } from '@/api/dataSource'
 import { getWorkspaces } from '@/api/workspace'
+import { getAgents } from '@/api/agent'
+import { createJob } from '@/api/job'
 
 const columns = [
   { title: 'ID', dataIndex: 'id', key: 'id', width: 60 },
@@ -122,7 +153,7 @@ const columns = [
   { title: '名称', dataIndex: 'name', key: 'name', width: 200 },
   { title: '类型', dataIndex: 'type', key: 'type', width: 80 },
   { title: '数据源', dataIndex: 'data_source', key: 'data_source', width: 200 },
-  { title: '操作', key: 'action', width: 160 },
+  { title: '操作', key: 'action', width: 220 },
 ]
 
 const dataSource = ref<DataModel[]>([])
@@ -148,6 +179,16 @@ const form = reactive({
 const dataSourceOptions = ref<Array<{ label: string; value: number }>>([])
 const workspaceOptions = ref<Array<{ label: string; value: number }>>([])
 const dataSourceMap = ref<Map<number, { name: string; platform: string }>>(new Map())
+
+// 扫描弹窗
+const scanModalVisible = ref(false)
+const scanSubmitLoading = ref(false)
+const scanTargetRecord = ref<DataModel | null>(null)
+const agentOptions = ref<Agent[]>([])
+const scanForm = reactive({ agent_id: undefined as number | undefined, input: '' })
+const scanModalTitle = computed(() =>
+  scanTargetRecord.value ? `扫描${scanTargetRecord.value.name}` : '扫描'
+)
 
 const rules = {
   code: [{ required: true, message: '请输入编码', trigger: 'blur' }],
@@ -292,6 +333,56 @@ const loadDataSources = async () => {
     })
   } catch (error) {
     console.error('加载数据源列表失败', error)
+  }
+}
+
+const loadAgentsForScan = async () => {
+  try {
+    const res = await getAgents({ skip: 0, limit: 500 })
+    const list = res.data || []
+    agentOptions.value = list
+    const defaultAgent = list.find((a: Agent) => (a.name || '').includes('系统管理助手'))
+    if (defaultAgent) {
+      scanForm.agent_id = defaultAgent.id
+    } else if (list.length > 0) {
+      scanForm.agent_id = list[0].id
+    }
+  } catch {
+    message.error('加载智能体列表失败')
+  }
+}
+
+const handleScan = (record: DataModel) => {
+  scanTargetRecord.value = record
+  scanForm.input = `分析id为${record.id}的数据模型的数据，总结模型说明，并保存分析结果`
+  scanForm.agent_id = undefined
+  scanModalVisible.value = true
+  loadAgentsForScan()
+}
+
+const handleScanConfirm = async () => {
+  if (scanForm.agent_id == null) {
+    message.warning('请选择智能体')
+    return
+  }
+  scanSubmitLoading.value = true
+  try {
+    await createJob({
+      type: 'agent',
+      setting: JSON.stringify({
+        agent_id: scanForm.agent_id,
+        input: scanForm.input || '',
+      }),
+      description: scanTargetRecord.value
+        ? `扫描数据模型：${scanTargetRecord.value.name}（ID=${scanTargetRecord.value.id}）`
+        : undefined,
+    })
+    message.success('作业已创建，将自动执行')
+    scanModalVisible.value = false
+  } catch (e: any) {
+    message.error(e.response?.data?.msg || '创建作业失败')
+  } finally {
+    scanSubmitLoading.value = false
   }
 }
 

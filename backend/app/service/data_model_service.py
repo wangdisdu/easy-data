@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.core.biz_error import BizError, BizErrorCode
 from app.dao.models import TbDataModel
-from app.services.workspace_relation_service import WorkSpaceRelationService
+from app.service.workspace_relation_service import WorkSpaceRelationService
 
 
 class DataModelCreate(BaseModel):

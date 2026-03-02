@@ -6,11 +6,7 @@
 - AGENT_ROWS, AGENT_NODE_ROWS, AGENT_EDGE_ROWS: app.dao.data.tb_agent（由 data/agents/* 各文件组成）
 """
 
-from app.dao.data.tb_agent import (
-    AGENT_EDGE_ROWS,
-    AGENT_NODE_ROWS,
-    AGENT_ROWS,
-)
+from app.dao.data.tb_agent import AGENT_EDGE_ROWS, AGENT_NODE_ROWS, AGENT_ROWS
 from app.dao.data.tb_llm import LLM_ROWS
 from app.dao.data.tb_tool import TOOL_ROWS
 

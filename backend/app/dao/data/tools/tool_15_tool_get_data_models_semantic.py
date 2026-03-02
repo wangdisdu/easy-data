@@ -54,8 +54,8 @@ CONTENT = """def tool_get_data_models_semantic(model_ids: str) -> str:
     from app.dao.database import SessionLocal
     from app.dao.models import TbDataModel
     from app.dao.models import TbDataSource
-    from app.services.data_models_service import DataModelService
-    from app.services.data_models_service import DataModelUpdate
+    from app.service.data_model_service import DataModelService
+    from app.service.data_model_service import DataModelUpdate
     db = SessionLocal()
     try:
         # 解析模型ID列表

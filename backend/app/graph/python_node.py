@@ -11,7 +11,7 @@ from langgraph.graph import StateGraph
 
 from app.core.biz_error import BizError, BizErrorCode
 from app.core.logging import get_logger
-from app.services.agents_service import AgentGraphNodeModel, PythonNodeConfig
+from app.service.agent_service import AgentGraphNodeModel, PythonNodeConfig
 
 logger = get_logger(__name__)
 

@@ -2,6 +2,7 @@
 Easy Data 主应用入口
 """
 
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -29,11 +30,24 @@ from app.dao.init_db import init_db_data
 # 前端静态文件目录（backend/www）
 WWW_DIR = Path(__file__).resolve().parent.parent / "www"
 
+HTTP_STATUS_NOT_FOUND = 404
+
 # 创建数据库表
 Base.metadata.create_all(bind=engine)
 
 # 初始化数据库基础数据
 init_db_data()
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    """应用生命周期：启动时启动作业扫描器"""
+    from app.job.scanner import start_job_scanner
+
+    start_job_scanner()
+    yield
+    # shutdown 时无需显式停止扫描任务，进程退出即结束
+
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -41,6 +55,7 @@ app = FastAPI(
     description="Easy Data - 致力于做真正的的智能平台",
     docs_url="/api/docs",
     redoc_url="/api/redoc",
+    lifespan=lifespan,
 )
 
 
@@ -50,7 +65,7 @@ class SPAStaticFilesMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next) -> Response:
         response = await call_next(request)
         if (
-            response.status_code == 404
+            response.status_code == HTTP_STATUS_NOT_FOUND
             and request.method == "GET"
             and not request.url.path.startswith("/api")
             and WWW_DIR.joinpath("index.html").exists()

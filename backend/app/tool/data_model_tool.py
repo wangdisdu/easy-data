@@ -14,7 +14,7 @@ from app.core.json_utils import json_dumps, normalize_query_results
 from app.core.logging import get_logger
 from app.dao.database import SessionLocal
 from app.dao.models import TbDataModel
-from app.services.data_models_service import DataModelCreate, DataModelService, DataModelUpdate
+from app.service.data_model_service import DataModelCreate, DataModelService, DataModelUpdate
 from app.tool.data_source_tool import get_data_source
 from app.tool.tool_utils import format_tool_params
 

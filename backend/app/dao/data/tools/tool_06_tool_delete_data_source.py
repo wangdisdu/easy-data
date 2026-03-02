@@ -44,7 +44,7 @@ CONTENT = """def tool_delete_data_source(ds_id_or_code: str) -> str:
     from app.dao.database import SessionLocal
     from app.dao.models import TbDataModel
     from app.dao.models import TbDataSource
-    from app.services.data_sources_service import DataSourceService
+    from app.service.data_source_service import DataSourceService
     db = SessionLocal()
     try:
         if ds_id_or_code.isdigit():

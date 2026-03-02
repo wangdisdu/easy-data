@@ -15,9 +15,9 @@ from app.core.biz_error import BizError, BizErrorCode
 from app.core.logging import get_logger
 from app.dao.models import TbLlm
 from app.graph.tool_node import build_tool_from
-from app.services.agents_service import AgentGraphNodeModel, LlmNodeConfig
-from app.services.llm_service import LlmService
-from app.services.tools_service import ToolService
+from app.service.agent_service import AgentGraphNodeModel, LlmNodeConfig
+from app.service.llm_service import LlmService
+from app.service.tool_service import ToolService
 
 logger = get_logger(__name__)
 

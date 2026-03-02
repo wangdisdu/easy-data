@@ -9,7 +9,7 @@ from app.api.auth import get_current_user
 from app.core.biz_error import BizError, BizErrorCode
 from app.core.models import PagedResp, Resp
 from app.dao.database import get_db
-from app.services.tools_service import ToolCreate, ToolResponse, ToolService, ToolUpdate
+from app.service.tool_service import ToolCreate, ToolResponse, ToolService, ToolUpdate
 
 router = APIRouter()
 

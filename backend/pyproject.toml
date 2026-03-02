@@ -34,7 +34,6 @@ dependencies = [
     "psycopg2-binary==2.9.10",
     "pymysql==1.1.1",
     "pyodbc==5.1.0",
-    "cx-oracle==8.3.0",
     "clickhouse-connect==0.10.0",
     # 认证相关
     "python-jose[cryptography]==3.3.0",
@@ -60,6 +59,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+oracle = ["cx-oracle==8.3.0"]
 dev = [
     "black>=24.0.0",
     "isort>=5.13.0",

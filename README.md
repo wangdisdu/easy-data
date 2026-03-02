@@ -95,6 +95,31 @@ npm run dev
 - **管理域**: http://localhost:5173/admin
 - **登录页面**: http://localhost:5173/login
 
+## Docker 部署
+
+项目支持使用 Docker 一键构建并运行，同时提供后端 API 与前端静态资源，无需单独部署 Nginx。
+
+**前提**：已安装 Docker。
+
+```bash
+# 构建前请先将前端构建产物放入 backend/www（如：cd frontend && npm run build && cp -r dist ../backend/www）
+# 构建镜像（基础镜像为 python:3.12-slim-bookworm）
+make docker-build
+
+# 后台运行容器，映射端口 8000
+make docker-run
+```
+
+访问 **http://localhost:8000** 即可使用（API 文档：http://localhost:8000/api/docs）。
+
+停止并删除容器：
+
+```bash
+make docker-stop
+```
+
+如需持久化数据（如 SQLite），可在 `docker run` 时挂载卷并设置环境变量 `DATABASE_URL` 指向卷内路径。
+
 ## 功能特性
 
 ### 对话域（Chat Domain）

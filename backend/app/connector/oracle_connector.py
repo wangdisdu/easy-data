@@ -1,6 +1,9 @@
 from typing import Any, Optional
 
-import cx_Oracle
+try:
+    import cx_Oracle
+except ImportError:
+    cx_Oracle = None  # type: ignore[assignment]
 
 from app.connector.base import BaseConnector
 from app.connector.models import ConnectionTestResult
@@ -34,6 +37,10 @@ class OracleConnector(BaseConnector):
         Args:
             database: 要连接的数据库名称(service_name)，默认为当前连接的数据库
         """
+        if cx_Oracle is None:
+            raise RuntimeError(
+                "Oracle 支持需要安装 cx-oracle 依赖，请执行: pip install -e '.[oracle]'"
+            )
         if not self.connection or not self.connection.is_connected():
             # 构建DSN (Data Source Name)
             dsn = cx_Oracle.makedsn(

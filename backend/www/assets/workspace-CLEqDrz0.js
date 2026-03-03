@@ -1,0 +1,1 @@
+import{ay as s}from"./index-BXdmJKqv.js";const a=e=>s.get("/workspaces",{params:e}),o=e=>s.post("/workspaces",e),c=(e,r)=>s.put(`/workspaces/${e}`,r),p=e=>s.delete(`/workspaces/${e}`);export{o as c,p as d,a as g,c as u};

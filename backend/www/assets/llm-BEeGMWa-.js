@@ -1,1 +1,0 @@
-import{ay as e}from"./index-CP9a24iS.js";const r=t=>e.get("/llms",{params:t}),m=t=>e.get(`/llms/${t}`),a=t=>e.post("/llms",t),n=(t,s)=>e.put(`/llms/${t}`,s),o=t=>e.delete(`/llms/${t}`);export{m as a,a as c,o as d,r as g,n as u};

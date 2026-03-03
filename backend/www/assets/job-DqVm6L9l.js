@@ -1,0 +1,1 @@
+import{ay as t}from"./index-BXdmJKqv.js";const s=e=>t.post("/jobs",e),r=e=>t.get("/jobs",{params:e}),b=e=>t.get(`/jobs/${e}`),n=e=>t.delete(`/jobs/${e}`),a=e=>t.get(`/jobs/${e}/logs`);export{b as a,a as b,s as c,n as d,r as g};

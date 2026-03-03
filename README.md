@@ -97,28 +97,27 @@ npm run dev
 
 ## Docker 部署
 
-项目支持使用 Docker 一键构建并运行，同时提供后端 API 与前端静态资源，无需单独部署 Nginx。
+使用 Docker 运行完整应用（后端 + 前端静态资源），无需单独部署 Nginx。
 
 **前提**：已安装 Docker。
 
+- **.env 配置**：镜像内不包含 `.env`，敏感信息仅通过运行时注入。在项目根目录执行 `cp .env.example .env` 并按需修改（JWT、LLM API 等），`make docker-run` 会自动使用 `--env-file .env` 注入环境变量。
+- **数据持久化**：SQLite 数据库挂载到宿主机目录，默认 `./data`，库文件为 `data/easy_data.db`，容器删除后数据不丢失。自定义目录：`make docker-run DATA_DIR=/path/to/data`。
+
+**构建与运行**：
+
 ```bash
-# 构建前请先将前端构建产物放入 backend/www（如：cd frontend && npm run build && cp -r dist ../backend/www）
-# 构建镜像（基础镜像为 python:3.12-slim-bookworm）
+# 构建前将前端产物放入 backend/www：cd frontend && npm run build && cp -r dist ../backend/www
+# 构建：先清理同名镜像再构建，保证为当前代码
 make docker-build
 
-# 后台运行容器，映射端口 8000
+# 后台运行：端口 8000、挂载数据目录、注入 .env（若存在）
 make docker-run
 ```
 
-访问 **http://localhost:8000** 即可使用（API 文档：http://localhost:8000/api/docs）。
+访问 **http://localhost:8000**（API 文档：http://localhost:8000/api/docs）。
 
-停止并删除容器：
-
-```bash
-make docker-stop
-```
-
-如需持久化数据（如 SQLite），可在 `docker run` 时挂载卷并设置环境变量 `DATABASE_URL` 指向卷内路径。
+**停止容器**：`make docker-stop`
 
 ## 功能特性
 

@@ -81,6 +81,8 @@ vite.config.*.timestamp-*
 # ============================================
 # Database
 # ============================================
+# Docker 挂载的 SQLite 数据目录（make docker-run 使用）
+data/
 *.db
 *.sqlite
 *.sqlite3

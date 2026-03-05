@@ -95,6 +95,10 @@
           <a-textarea v-model:value="form.description" :rows="3" placeholder="请输入描述" />
         </a-form-item>
 
+        <a-form-item name="knowledge" label="外部知识">
+          <a-textarea v-model:value="form.knowledge" :rows="3" placeholder="请输入外部知识（可选）" />
+        </a-form-item>
+
         <a-form-item name="workspace_ids" label="关联工作空间">
           <a-select
             v-model:value="form.workspace_ids"
@@ -159,6 +163,7 @@ const form = reactive({
   setting: '',
   semantic: '',
   description: '',
+  knowledge: '',
   workspace_ids: [] as number[],
 })
 
@@ -315,6 +320,7 @@ const showCreateModal = () => {
     setting: '',
     semantic: '',
     description: '',
+    knowledge: '',
     workspace_ids: [],
   })
 
@@ -344,18 +350,20 @@ const handleEdit = async (record: DataSource) => {
       setting: detail.setting,
       semantic: detail.semantic || '',
       description: detail.description || '',
+      knowledge: detail.knowledge || '',
       workspace_ids: detail.workspace_ids || [],
     })
   } catch (error) {
     // 如果获取详情失败，使用列表数据
-  Object.assign(form, {
-    name: record.name,
-    platform: record.platform,
-    setting: record.setting,
+    Object.assign(form, {
+      name: record.name,
+      platform: record.platform,
+      setting: record.setting,
       semantic: record.semantic || '',
-    description: record.description || '',
+      description: record.description || '',
+      knowledge: record.knowledge || '',
       workspace_ids: record.workspace_ids || [],
-  })
+    })
   }
 
   // 解析JSON配置到dbConfig

@@ -8,6 +8,7 @@ export interface DataSource {
   setting: string
   semantic?: string
   description?: string
+  knowledge?: string
   extend?: string
   create_time: number
   update_time: number
@@ -21,6 +22,7 @@ export interface DataSourceCreate {
   setting: string
   semantic?: string
   description?: string
+  knowledge?: string
   extend?: string
   workspace_ids?: number[]
 }
@@ -31,6 +33,7 @@ export interface DataSourceUpdate {
   setting?: string
   semantic?: string
   description?: string
+  knowledge?: string
   extend?: string
   workspace_ids?: number[]
 }

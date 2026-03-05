@@ -28,6 +28,7 @@ class DataSourceCreate(BaseModel):
     setting: str
     semantic: Optional[str] = None
     description: Optional[str] = None
+    knowledge: Optional[str] = None
     extend: Optional[str] = None
     workspace_ids: Optional[list[int]] = None
 
@@ -40,6 +41,7 @@ class DataSourceUpdate(BaseModel):
     setting: Optional[str] = None
     semantic: Optional[str] = None
     description: Optional[str] = None
+    knowledge: Optional[str] = None
     extend: Optional[str] = None
     workspace_ids: Optional[list[int]] = None
 
@@ -54,6 +56,7 @@ class DataSourceResponse(BaseModel):
     setting: str
     semantic: Optional[str] = None
     description: Optional[str] = None
+    knowledge: Optional[str] = None
     extend: Optional[str] = None
     create_time: int
     update_time: int
@@ -97,6 +100,7 @@ class DataSourceService:
             setting=data_source_data.setting,
             semantic=data_source_data.semantic,
             description=data_source_data.description,
+            knowledge=data_source_data.knowledge,
             extend=data_source_data.extend,
             create_time=current_time,
             update_time=current_time,
@@ -197,6 +201,8 @@ class DataSourceService:
             data_source.semantic = data_source_update.semantic
         if data_source_update.description is not None:
             data_source.description = data_source_update.description
+        if data_source_update.knowledge is not None:
+            data_source.knowledge = data_source_update.knowledge
         if data_source_update.extend is not None:
             data_source.extend = data_source_update.extend
 

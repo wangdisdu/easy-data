@@ -54,6 +54,7 @@ class TbDataSource(BaseModel):
     setting = Column(Text, nullable=False, comment="数据库配置信息")
     semantic = Column(Text, nullable=True, comment="数据源语义说明")
     description = Column(Text, nullable=True, comment="数据源说明")
+    knowledge = Column(Text, nullable=True, comment="外部知识")
     extend = Column(Text, nullable=True, comment="扩展信息")
 
 

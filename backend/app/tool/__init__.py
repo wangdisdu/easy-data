@@ -19,7 +19,7 @@ from app.tool.data_source_tool import (
     tool_execute_sql_data_source,
     tool_get_data_source,
     tool_list_data_source,
-    tool_test_data_source,
+    tool_test_data_source_setting,
     tool_update_data_source,
 )
 from app.tool.system_health_tool import (
@@ -30,6 +30,7 @@ from app.tool.system_health_tool import (
     tool_check_models_semantic,
     tool_check_semantic_freshness,
 )
+from app.tool.system_sql_tool import tool_execute_system_sql
 
 __all__ = [
     "tool_check_data_source_connection",
@@ -50,7 +51,8 @@ __all__ = [
     "tool_import_data_models_by_data_source",
     "tool_list_data_models_by_data_source",
     "tool_list_data_source",
-    "tool_test_data_source",
+    "tool_test_data_source_setting",
     "tool_update_data_model_semantic_and_summary",
     "tool_update_data_source",
+    "tool_execute_system_sql",
 ]

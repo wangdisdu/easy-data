@@ -3,6 +3,7 @@ Agent模块
 """
 
 from app.agent.admin_agent import AdminAgent
+from app.agent.admin_deep_agent import AdminDeepAgent, create_admin_deep_agent
 from app.agent.data_model_agent import DataModelAgent
 from app.agent.data_model_analysis_agent import DataModelAnalysisAgent
 from app.agent.data_source_agent import DataSourceAgent
@@ -11,9 +12,11 @@ from app.agent.text_to_sql_agent import TextToSqlAgent
 
 __all__ = [
     "AdminAgent",
+    "AdminDeepAgent",
     "DataModelAgent",
     "DataModelAnalysisAgent",
     "DataSourceAgent",
     "SystemHealthAgent",
     "TextToSqlAgent",
+    "create_admin_deep_agent",
 ]

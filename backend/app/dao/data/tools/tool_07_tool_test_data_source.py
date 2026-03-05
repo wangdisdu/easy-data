@@ -1,4 +1,4 @@
-"""工具初始化数据: tool_test_data_source"""
+"""工具初始化数据: tool_test_data_source_setting"""
 
 DESCRIPTION = """测试数据源连接是否可用
 
@@ -25,7 +25,7 @@ Returns:
 
 Example:
     测试MySQL连接：
-    tool_test_data_source(
+    tool_test_data_source_setting(
         platform="mysql",
         host="localhost",
         port=3306,
@@ -35,7 +35,7 @@ Example:
     )
 """
 
-CONTENT = """def tool_test_data_source(
+CONTENT = """def tool_test_data_source_setting(
     platform: str, host: str, port: int, username: str, password: str, database: str
 ) -> str:
     from app.connector.factory import ConnectorFactory
@@ -64,7 +64,7 @@ CONTENT = """def tool_test_data_source(
 """
 
 ROW = {
-    "tool": "tool_test_data_source",
+    "tool": "tool_test_data_source_setting",
     "description": DESCRIPTION,
     "parameters": "",
     "content": CONTENT,

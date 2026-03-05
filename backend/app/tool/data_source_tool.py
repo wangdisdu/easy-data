@@ -35,11 +35,11 @@ def get_data_source(db: Session, ds_id_or_code: str):
 
 
 @tool
-def tool_test_data_source(
+def tool_test_data_source_setting(
     platform: str, host: str, port: int, username: str, password: str, database: str
 ) -> str:
     """
-    测试数据源连接是否可用
+    测试数据源连接配置是否可用
 
     该工具用于验证数据库连接配置是否正确，在创建数据源之前应该先使用此工具测试连接。
     工具会尝试连接到指定的数据库，如果连接成功则返回成功信息，如果失败则返回详细的错误原因。
@@ -64,7 +64,7 @@ def tool_test_data_source(
 
     Example:
         测试MySQL连接：
-        tool_test_data_source(
+        tool_test_data_source_setting(
             platform="mysql",
             host="localhost",
             port=3306,
@@ -74,7 +74,7 @@ def tool_test_data_source(
         )
     """
     logger.info(
-        f"[TOOL-CALL] tool_test_data_source - {format_tool_params(platform=platform, host=host, port=port, username=username, password=password, database=database)}"
+        f"[TOOL-CALL] tool_test_data_source_setting - {format_tool_params(platform=platform, host=host, port=port, username=username, password=password, database=database)}"
     )
     try:
         # 创建连接器实例
@@ -87,20 +87,20 @@ def tool_test_data_source(
 
         if test_result.success:
             success_msg = f"数据源连接测试成功：{test_result.message}"
-            logger.info(f"[TOOL-RESULT] tool_test_data_source - 成功：{test_result.message}")
+            logger.info(f"[TOOL-RESULT] tool_test_data_source_setting - 成功：{test_result.message}")
             return success_msg
         else:
             error_msg = f"数据源连接测试失败：{test_result.message}"
-            logger.warning(f"[TOOL-RESULT] tool_test_data_source - 失败：{test_result.message}")
+            logger.warning(f"[TOOL-RESULT] tool_test_data_source_setting - 失败：{test_result.message}")
             return error_msg
 
     except ValueError:
         error_msg = f"不支持的数据库类型：{platform}。支持的类型：{', '.join(ConnectorFactory.get_supported_dbs())}"
-        logger.exception("[TOOL-RESULT] tool_test_data_source - 失败")
+        logger.exception("[TOOL-RESULT] tool_test_data_source_setting - 失败")
         return error_msg
     except Exception as e:
         error_msg = f"测试数据源连接时发生错误：{e!s}"
-        logger.exception("[TOOL-RESULT] tool_test_data_source - 失败")
+        logger.exception("[TOOL-RESULT] tool_test_data_source_setting - 失败")
         return error_msg
 
 
@@ -118,7 +118,7 @@ def tool_create_data_source(
     """
     创建并保存数据源配置到系统
 
-    该工具用于将数据库连接配置保存到系统中，以便后续使用。在创建之前，需要先使用 tool_test_data_source 测试连接是否可用。
+    该工具用于将数据库连接配置保存到系统中，以便后续使用。在创建之前，需要先使用 tool_test_data_source_setting 测试连接是否可用。
 
     重要提示：
     - code 和 name 参数应该根据连接配置信息智能生成，使其具有描述性和唯一性
@@ -193,7 +193,7 @@ def tool_create_data_source(
         )
 
     Note:
-        - 建议在创建数据源之前先调用 tool_test_data_source 验证连接
+        - 建议在创建数据源之前先调用 tool_test_data_source_setting 验证连接
         - code 必须唯一，如果已存在相同code的数据源，创建会失败
         - 连接配置信息（host, port, username, password, database）会被加密存储
     """

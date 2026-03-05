@@ -8,7 +8,7 @@ from typing import Any, Optional
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, status
 from pydantic import BaseModel
 
-from app.agent import TextToSqlAgent
+from app.agent import AdminAgent, AdminDeepAgent
 from app.agent.agent_executor import AgentExecutor
 from app.agent.base_agent import BaseAgent
 from app.core.biz_error import BizError
@@ -249,8 +249,8 @@ async def websocket_chat(websocket: WebSocket, token: Optional[str] = None):
         await websocket.accept()
         websocket_id = _accept_and_register_connection(websocket, user_id)
 
-        # 3. 创建 Agent 实例并获取会话 ID
-        agent = TextToSqlAgent(user_id=user_id)
+        # 3. 创建 Agent 实例并获取会话 ID（使用系统管理 AdminAgent）
+        agent = AdminDeepAgent(user_id=user_id)
         session_id = agent.create_session()
 
         # 4. 发送连接成功消息

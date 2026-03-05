@@ -142,6 +142,21 @@ class BaseAgent(ABC):
                 results.append(result)
         return results
 
+    def _get_messages_list_from_state_update(self, messages_value: Any) -> Optional[list]:
+        """从 updates 流中的 messages 字段取出可下标的列表。
+
+        部分图（如 deepagents）在 updates 中会传入 Overwrite 等包装类型而非直接列表，
+        需要取出真实列表再处理，避免 'Overwrite' object is not subscriptable。
+        """
+        if messages_value is None:
+            return None
+        if isinstance(messages_value, list):
+            return messages_value
+        # LangGraph 等可能用 Overwrite / 带 .value 的包装
+        if hasattr(messages_value, "value"):
+            return self._get_messages_list_from_state_update(messages_value.value)
+        return None
+
     def _process_updates_stream(self, chunk: Any) -> list[dict[str, Any]]:
         """处理 updates 流模式的数据
 
@@ -156,12 +171,14 @@ class BaseAgent(ABC):
 
         results = []
         for node_name, node_state in chunk.items():
-            if not (
-                isinstance(node_state, dict) and "messages" in node_state and node_state["messages"]
-            ):
+            if not (isinstance(node_state, dict) and "messages" in node_state):
                 continue
 
-            last_message = node_state["messages"][-1]
+            messages_list = self._get_messages_list_from_state_update(node_state["messages"])
+            if not messages_list:
+                continue
+
+            last_message = messages_list[-1]
             if not (hasattr(last_message, "tool_calls") and last_message.tool_calls):
                 continue
 

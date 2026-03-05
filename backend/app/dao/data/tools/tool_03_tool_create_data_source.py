@@ -2,7 +2,7 @@
 
 DESCRIPTION = """创建并保存数据源配置到系统
 
-该工具用于将数据库连接配置保存到系统中，以便后续使用。在创建之前，需要先使用 tool_test_data_source 测试连接是否可用。
+该工具用于将数据库连接配置保存到系统中，以便后续使用。在创建之前，需要先使用 tool_test_data_source_setting 测试连接是否可用。
 
 重要提示：
 - code 和 name 参数应该根据连接配置信息智能生成，使其具有描述性和唯一性
@@ -77,7 +77,7 @@ Example:
     )
 
 Note:
-    - 建议在创建数据源之前先调用 tool_test_data_source 验证连接
+    - 建议在创建数据源之前先调用 tool_test_data_source_setting 验证连接
     - code 必须唯一，如果已存在相同code的数据源，创建会失败
     - 连接配置信息（host, port, username, password, database）会被加密存储
 """

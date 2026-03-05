@@ -19,7 +19,7 @@ from app.tool import (
     tool_create_data_source,
     tool_delete_data_source,
     tool_list_data_source,
-    tool_test_data_source,
+    tool_test_data_source_setting,
     tool_update_data_source,
 )
 
@@ -51,7 +51,7 @@ class DataSourceAgent(BaseAgent):
 
         # 阶段二:主流程（绑定所有数据源操作工具）
         self.tools_main = [
-            tool_test_data_source,
+            tool_test_data_source_setting_setting,
             tool_create_data_source,
             tool_delete_data_source,
             tool_update_data_source,

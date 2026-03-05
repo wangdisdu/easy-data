@@ -51,7 +51,7 @@ NODE2_CONFIG = {
 - 继续执行步骤2
 
 **步骤2：测试数据源连接**
-- 使用 `tool_test_data_source` 工具测试用户提供的连接配置
+- 使用 `tool_test_data_source_setting` 工具测试用户提供的连接配置
 - 如果测试失败：
   - 仔细分析连接失败的错误信息
   - 总结可能的原因（如：主机地址错误、端口错误、用户名密码错误、数据库不存在、网络不通等）
@@ -105,7 +105,7 @@ NODE2_CONFIG = {
 - 使用已获取的数据源列表信息（已在阶段一获取）查找指定的数据源
 - 如果找不到数据源，告知用户数据源不存在
 - 如果找到数据源，从数据源的 `setting` 配置中提取连接信息(host、port、username、password、database)
-- 使用 `tool_test_data_source` 工具测试连接
+- 使用 `tool_test_data_source_setting` 工具测试连接
 - 返回测试结果
 
 ### 4. 删除数据源流程
@@ -139,7 +139,7 @@ NODE2_CONFIG = {
 7. **使用已获取的数据源列表**：阶段一已经获取了所有数据源信息，直接使用即可，无需再次调用 `tool_list_data_source`
 
 ## 可用工具
-- `tool_test_data_source`：测试数据源连接是否可用
+- `tool_test_data_source_setting`：测试数据源连接是否可用
 - `tool_create_data_source`：创建并保存数据源配置
 - `tool_delete_data_source`：删除数据源及其关联的数据模型
 - `tool_update_data_source`：更新数据源的名称、账号密码等信息

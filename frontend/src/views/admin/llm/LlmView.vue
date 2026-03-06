@@ -93,8 +93,8 @@ const columns = [
   { title: 'ID', dataIndex: 'id', key: 'id', width: 60 },
   { title: '提供商', key: 'provider', width: 120 },
   { title: '模型', dataIndex: 'model', key: 'model', width: 150 },
-  { title: 'API密钥', key: 'api_key', width: 150 },
-  { title: '基础URL', dataIndex: 'base_url', key: 'base_url', width: 200 },
+  { title: 'API密钥', key: 'api_key', width: 150, ellipsis: true },
+  { title: '基础URL', dataIndex: 'base_url', key: 'base_url', width: 200, ellipsis: true },
   { title: '描述', dataIndex: 'description', key: 'description', width: 200, ellipsis: true },
   { title: '操作', key: 'action', width: 160 },
 ]

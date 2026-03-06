@@ -74,7 +74,7 @@ import { getTools, getTool, createTool, updateTool, deleteTool } from '@/api/too
 
 const columns = [
   { title: 'ID', dataIndex: 'id', key: 'id', width: 60 },
-  { title: '工具函数名', dataIndex: 'tool', key: 'tool', width: 200 },
+  { title: '工具函数名', dataIndex: 'tool', key: 'tool', width: 200, ellipsis: true },
   { title: '描述', dataIndex: 'description', key: 'description', width: 300, ellipsis: true },
   { title: '操作', key: 'action', width: 160 },
 ]

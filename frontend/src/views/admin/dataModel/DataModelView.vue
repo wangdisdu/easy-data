@@ -19,7 +19,7 @@
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'action'">
           <a-space>
-            <a-button type="link" @click="handleScan(record)">扫描</a-button>
+            <a-button type="link" @click="handleScan(record)">分析</a-button>
             <a-button type="link" @click="handleEdit(record)">编辑</a-button>
             <a-popconfirm title="确定要删除吗？" @confirm="handleDelete(record.id)">
               <a-button type="link" danger>删除</a-button>
@@ -28,6 +28,10 @@
         </template>
         <template v-else-if="column.key === 'data_source'">
           {{ getDataSourceDisplay(record.ds_id) }}
+        </template>
+        <template v-else-if="column.key === 'model_desc'">
+          <span v-if="!hasSemanticOrSummary(record)">待分析</span>
+          <a-button v-else type="link" @click="openDescModal(record)">模型说明</a-button>
         </template>
       </template>
     </a-table>
@@ -119,7 +123,7 @@
           <a-select
             v-model:value="scanForm.agent_id"
             placeholder="请选择智能体"
-            :options="agentOptions.map((a) => ({ label: a.name, value: a.id }))"
+            :options="agentOptions"
             style="width: 100%"
           />
         </a-form-item>
@@ -131,6 +135,52 @@
           />
         </a-form-item>
       </a-form>
+    </a-modal>
+
+    <!-- 模型说明弹窗：查看（Markdown）与编辑 -->
+    <a-modal
+      v-model:open="descModalVisible"
+      :title="descModalTitle"
+      width="720px"
+      @cancel="closeDescModal"
+    >
+      <div v-if="descModalViewMode" class="desc-modal-view">
+        <div v-if="descForm.semantic" class="desc-section">
+          <div class="desc-section-title">语义说明</div>
+          <div class="desc-content markdown-body" v-html="renderedSemantic"></div>
+        </div>
+        <div v-if="descForm.summary" class="desc-section">
+          <div class="desc-section-title">摘要说明</div>
+          <div class="desc-content markdown-body" v-html="renderedSummary"></div>
+        </div>
+        <div v-if="!descForm.semantic && !descForm.summary" class="desc-empty">暂无说明内容</div>
+      </div>
+      <a-form v-else layout="vertical">
+        <a-form-item label="语义说明">
+          <a-textarea
+            v-model:value="descForm.semantic"
+            :rows="8"
+            placeholder="请输入模型的语义说明"
+          />
+        </a-form-item>
+        <a-form-item label="摘要说明">
+          <a-textarea
+            v-model:value="descForm.summary"
+            :rows="4"
+            placeholder="请输入模型的摘要说明"
+          />
+        </a-form-item>
+      </a-form>
+      <template #footer>
+        <template v-if="descModalViewMode">
+          <a-button @click="closeDescModal">关闭</a-button>
+          <a-button type="primary" @click="descModalViewMode = false">编辑</a-button>
+        </template>
+        <template v-else>
+          <a-button @click="descModalViewMode = true">取消</a-button>
+          <a-button type="primary" :loading="descSaveLoading" @click="saveDescAndClose">保存</a-button>
+        </template>
+      </template>
     </a-modal>
   </div>
 </template>
@@ -144,15 +194,17 @@ import type { Agent } from '@/api/agent'
 import { getDataModels, createDataModel, updateDataModel, deleteDataModel, getDataModel } from '@/api/dataModel'
 import { getDataSources } from '@/api/dataSource'
 import { getWorkspaces } from '@/api/workspace'
-import { getAgents } from '@/api/agent'
+import { getAgents, getDirectoryAgents } from '@/api/agent'
 import { createJob } from '@/api/job'
+import { renderMarkdown } from '@/utils/markdown'
 
 const columns = [
   { title: 'ID', dataIndex: 'id', key: 'id', width: 60 },
-  { title: '编码', dataIndex: 'code', key: 'code', width: 200 },
-  { title: '名称', dataIndex: 'name', key: 'name', width: 200 },
-  { title: '类型', dataIndex: 'type', key: 'type', width: 80 },
-  { title: '数据源', dataIndex: 'data_source', key: 'data_source', width: 200 },
+  { title: '编码', dataIndex: 'code', key: 'code', width: 200, ellipsis: true },
+  { title: '名称', dataIndex: 'name', key: 'name', width: 200, ellipsis: true },
+  { title: '类型', dataIndex: 'type', key: 'type', width: 80, ellipsis: true },
+  { title: '数据源', dataIndex: 'data_source', key: 'data_source', width: 200, ellipsis: true },
+  { title: '模型说明', key: 'model_desc', width: 120 },
   { title: '操作', key: 'action', width: 220 },
 ]
 
@@ -184,11 +236,23 @@ const dataSourceMap = ref<Map<number, { name: string; platform: string }>>(new M
 const scanModalVisible = ref(false)
 const scanSubmitLoading = ref(false)
 const scanTargetRecord = ref<DataModel | null>(null)
-const agentOptions = ref<Agent[]>([])
-const scanForm = reactive({ agent_id: undefined as number | undefined, input: '' })
+const agentOptions = ref<Array<{ label: string; value: string | number }>>([])
+const scanForm = reactive({ agent_id: undefined as string | number | undefined, input: '' })
 const scanModalTitle = computed(() =>
   scanTargetRecord.value ? `扫描${scanTargetRecord.value.name}` : '扫描'
 )
+
+// 模型说明弹窗
+const descModalVisible = ref(false)
+const descModalRecord = ref<DataModel | null>(null)
+const descModalViewMode = ref(true)
+const descSaveLoading = ref(false)
+const descForm = reactive({ semantic: '', summary: '' })
+const descModalTitle = computed(() =>
+  descModalRecord.value ? `模型说明：${descModalRecord.value.name}` : '模型说明'
+)
+const renderedSemantic = computed(() => renderMarkdown(descForm.semantic || ''))
+const renderedSummary = computed(() => renderMarkdown(descForm.summary || ''))
 
 const rules = {
   code: [{ required: true, message: '请输入编码', trigger: 'blur' }],
@@ -338,14 +402,24 @@ const loadDataSources = async () => {
 
 const loadAgentsForScan = async () => {
   try {
-    const res = await getAgents({ skip: 0, limit: 500 })
-    const list = res.data || []
-    agentOptions.value = list
-    const defaultAgent = list.find((a: Agent) => (a.name || '').includes('系统管理助手'))
-    if (defaultAgent) {
-      scanForm.agent_id = defaultAgent.id
-    } else if (list.length > 0) {
-      scanForm.agent_id = list[0].id
+    const [dirRes, dbRes] = await Promise.all([
+      getDirectoryAgents(),
+      getAgents({ skip: 0, limit: 500 }),
+    ])
+    const dirAgents = (dirRes.data || []).map((a) => ({
+      label: `${a.name} (deepagent)`,
+      value: a.id as string,
+    }))
+    const dbAgents = (dbRes.data || []).map((a: Agent) => ({
+      label: a.name,
+      value: a.id as number,
+    }))
+    agentOptions.value = [...dirAgents, ...dbAgents]
+    const adminOpt = dirAgents.find((a) => a.value === 'admin')
+    if (adminOpt) {
+      scanForm.agent_id = 'admin'
+    } else if (agentOptions.value.length > 0) {
+      scanForm.agent_id = agentOptions.value[0].value
     }
   } catch {
     message.error('加载智能体列表失败')
@@ -354,7 +428,7 @@ const loadAgentsForScan = async () => {
 
 const handleScan = (record: DataModel) => {
   scanTargetRecord.value = record
-  scanForm.input = `分析id为${record.id}的数据模型的数据，总结模型说明，并保存分析结果`
+  scanForm.input = `分析id为${record.id}的数据模型的数据并保存结果`
   scanForm.agent_id = undefined
   scanModalVisible.value = true
   loadAgentsForScan()
@@ -397,6 +471,56 @@ const getDataSourceDisplay = (dsId?: number): string => {
   return `${ds.platform} - ${ds.name}`
 }
 
+const hasSemanticOrSummary = (record: DataModel): boolean => {
+  const s = (record.semantic ?? '').trim()
+  const u = (record.summary ?? '').trim()
+  return s.length > 0 && u.length > 0
+}
+
+const openDescModal = async (record: DataModel) => {
+  descModalRecord.value = record
+  descModalViewMode.value = true
+  try {
+    const res = await getDataModel(record.id)
+    const d = res.data
+    descForm.semantic = d.semantic ?? ''
+    descForm.summary = d.summary ?? ''
+  } catch {
+    descForm.semantic = record.semantic ?? ''
+    descForm.summary = record.summary ?? ''
+  }
+  descModalVisible.value = true
+}
+
+const closeDescModal = () => {
+  descModalVisible.value = false
+  descModalRecord.value = null
+  descForm.semantic = ''
+  descForm.summary = ''
+}
+
+const saveDescAndClose = async () => {
+  const record = descModalRecord.value
+  if (!record) return
+  descSaveLoading.value = true
+  try {
+    await updateDataModel(record.id, {
+      semantic: descForm.semantic,
+      summary: descForm.summary,
+    })
+    message.success('保存成功')
+    const idx = dataSource.value.findIndex((r) => r.id === record.id)
+    if (idx >= 0) {
+      dataSource.value[idx] = { ...dataSource.value[idx], semantic: descForm.semantic, summary: descForm.summary }
+    }
+    closeDescModal()
+  } catch (e: unknown) {
+    message.error((e as { response?: { data?: { detail?: string } } })?.response?.data?.detail ?? '保存失败')
+  } finally {
+    descSaveLoading.value = false
+  }
+}
+
 const loadWorkspaces = async () => {
   try {
     const response = await getWorkspaces({ skip: 0, limit: 1000 })
@@ -428,5 +552,46 @@ onMounted(() => {
   margin: 0;
   font-size: 20px;
   font-weight: 500;
+}
+
+.desc-modal-view .desc-section {
+  margin-bottom: 16px;
+}
+
+.desc-modal-view .desc-section-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: rgba(0, 0, 0, 0.88);
+}
+
+.desc-modal-view .desc-content {
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 6px;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.desc-modal-view .desc-content:deep(.markdown-body) {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.desc-modal-view .desc-content:deep(.markdown-body p) {
+  margin: 0 0 8px;
+}
+
+.desc-modal-view .desc-content:deep(.markdown-body pre) {
+  margin: 8px 0;
+  padding: 12px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  overflow-x: auto;
+}
+
+.desc-modal-view .desc-empty {
+  color: rgba(0, 0, 0, 0.45);
+  text-align: center;
+  padding: 24px;
 }
 </style>

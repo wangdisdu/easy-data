@@ -8,15 +8,14 @@ from typing import Any, Optional
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, status
 from pydantic import BaseModel
 
-from app.agent import AdminAgent, AdminDeepAgent
+from app.agent import MainAgent
 from app.agent.agent_executor import AgentExecutor
-from app.agent.base_agent import BaseAgent
 from app.core.biz_error import BizError
 from app.core.logging import get_logger
 from app.dao.database import SessionLocal
 from app.service.auth_service import AuthService
 
-logger = get_logger("chat")
+logger = get_logger(__name__)
 
 router = APIRouter()
 
@@ -153,7 +152,11 @@ async def _send_error(websocket: WebSocket, session_id: str, error_message: str)
 
 
 async def _process_message_stream(
-    agent: BaseAgent, websocket: WebSocket, session_id: str, message: str, user_id: int
+    agent: MainAgent | AgentExecutor,
+    websocket: WebSocket,
+    session_id: str,
+    message: str,
+    user_id: int,
 ) -> None:
     """处理单条消息的流式输出
 
@@ -249,8 +252,8 @@ async def websocket_chat(websocket: WebSocket, token: Optional[str] = None):
         await websocket.accept()
         websocket_id = _accept_and_register_connection(websocket, user_id)
 
-        # 3. 创建 Agent 实例并获取会话 ID（使用系统管理 AdminAgent）
-        agent = AdminDeepAgent(user_id=user_id)
+        # 3. 创建 MainAgent（每次连接时加载子智能体，支持热更新）
+        agent = MainAgent(user_id=user_id)
         session_id = agent.create_session()
 
         # 4. 发送连接成功消息
@@ -328,7 +331,7 @@ async def websocket_chat_agent(websocket: WebSocket, agent_id: int, token: Optio
             if not message:
                 continue
 
-            # 使用 BaseAgent 的 astream 方法处理消息流
+            # 使用执行器的 astream 方法处理消息流
             await _process_message_stream(executor, websocket, session_id, message, user_id)
 
     except WebSocketDisconnect:

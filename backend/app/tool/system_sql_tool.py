@@ -5,21 +5,25 @@
 仅允许对白名单表执行 SELECT/INSERT/UPDATE/DELETE，禁止 DDL 与敏感表。
 """
 
+from __future__ import annotations
+
 import re
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from langchain_core.tools import tool
 from sqlalchemy import text
-from sqlalchemy.orm import Session
 
 from app.core.json_utils import json_dumps
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
 from app.core.logging import get_logger
 from app.dao.database import SessionLocal
 
 logger = get_logger("system_sql_tool")
 
 # 允许的语句类型（首词）
-ALLOWED_STATEMENTS = frozenset({"select", "insert", "update", "delete"})
+ALLOWED_STATEMENTS = frozenset({"select", "insert", "update", "delete", "pragma", "show"})
 
 
 def _validate_sql(sql: str) -> tuple[bool, str]:
@@ -39,7 +43,7 @@ def _validate_sql(sql: str) -> tuple[bool, str]:
         return False, "仅支持单条 SQL 语句"
 
     # 首词必须是 SELECT/INSERT/UPDATE/DELETE
-    first_word = re.split(r"[\s(\n]+", raw, 1)[0].strip().lower()
+    first_word = re.split(r"[\s(\n]+", raw, maxsplit=1)[0].strip().lower()
     if first_word not in ALLOWED_STATEMENTS:
         return False, f"仅允许 SELECT/INSERT/UPDATE/DELETE，当前首词: {first_word}"
 
@@ -54,21 +58,17 @@ def _rows_to_json(rows: list[Any], keys: list[str]) -> str:
             out.append(dict(row._mapping))
         elif hasattr(row, "_asdict"):
             out.append(row._asdict())
-        elif isinstance(row, (list, tuple)):
-            out.append(dict(zip(keys, row)))
+        elif isinstance(row, list | tuple):
+            out.append(dict(zip(keys, row, strict=True)))
         else:
-            out.append(dict(zip(keys, row)))
+            out.append(dict(zip(keys, row, strict=True)))
     return json_dumps(out, ensure_ascii=False, indent=2)
 
 
 @tool
 def tool_execute_system_sql(sql: str) -> str:
     """
-    在应用系统数据库上执行一条 SQL（仅限数据源、数据模型、工作空间相关表）。
-
-    允许的语句：SELECT、INSERT、UPDATE、DELETE。
-    允许的表：tb_data_source、tb_data_model、tb_work_space、tb_work_space_relation。
-    禁止：DDL、多语句、注释、敏感表（如 tb_user）。
+    在系统数据库上执行一条 SQL。
 
     使用场景：由 SKILL 根据用户意图生成 SQL，再调用本工具执行并返回结果。
 

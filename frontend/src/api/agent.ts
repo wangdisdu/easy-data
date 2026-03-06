@@ -75,9 +75,18 @@ export interface AgentGraphModel {
   edges: AgentGraphEdge[]
 }
 
-// 获取智能体列表
+// 获取智能体列表（tb_agent 表）
 export const getAgents = (params?: { skip?: number; limit?: number }) => {
   return request.get<{ data: Agent[]; total: number }>('/agents', { params })
+}
+
+// 获取 agents 目录下的智能体列表
+export interface DirectoryAgent {
+  id: string
+  name: string
+}
+export const getDirectoryAgents = () => {
+  return request.get<{ data: DirectoryAgent[] }>('/deepagents')
 }
 
 // 获取智能体详情

@@ -5,6 +5,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.agent.deep_agent import list_deepagents
 from app.api.auth import get_current_user
 from app.core.biz_error import BizError, BizErrorCode
 from app.core.logging import get_logger
@@ -43,9 +44,16 @@ async def get_agents(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
-    """获取智能体列表"""
+    """获取智能体列表（tb_agent 表）"""
     agents, total = AgentService.get_agents(db=db, skip=skip, limit=limit)
     return PagedResp(data=agents, total=total)
+
+
+@router.get("/deepagents", response_model=Resp[list[dict]])
+async def get_deepagents(current_user=Depends(get_current_user)):
+    """获取 agents 目录下的智能体列表"""
+    agents = [{"id": item, "name": item} for item in list_deepagents()]
+    return Resp(data=agents)
 
 
 @router.get("/agents/{agent_id}", response_model=Resp[AgentResponse])

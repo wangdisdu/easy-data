@@ -14,7 +14,7 @@ from app.dao.models import TbUser
 from app.service.auth_service import AuthService, Token, UserCreate
 from app.service.user_service import UserResponse
 
-logger = get_logger("auth")
+logger = get_logger(__name__)
 
 router = APIRouter()
 

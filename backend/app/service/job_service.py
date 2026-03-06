@@ -51,7 +51,7 @@ class JobLogResponse(BaseModel):
 class JobCreate(BaseModel):
     """作业创建模型"""
 
-    type: str = "agent"
+    type: str = "agents"
     setting: str
     description: Optional[str] = None
 

@@ -2,21 +2,10 @@
 Agent模块
 """
 
-from app.agent.admin_agent import AdminAgent
-from app.agent.admin_deep_agent import AdminDeepAgent, create_admin_deep_agent
-from app.agent.data_model_agent import DataModelAgent
-from app.agent.data_model_analysis_agent import DataModelAnalysisAgent
-from app.agent.data_source_agent import DataSourceAgent
-from app.agent.system_health_agent import SystemHealthAgent
-from app.agent.text_to_sql_agent import TextToSqlAgent
+from app.agent.deep_agent import DeepAgent
+from app.agent.main_agent import MainAgent
 
 __all__ = [
-    "AdminAgent",
-    "AdminDeepAgent",
-    "DataModelAgent",
-    "DataModelAnalysisAgent",
-    "DataSourceAgent",
-    "SystemHealthAgent",
-    "TextToSqlAgent",
-    "create_admin_deep_agent",
+    "DeepAgent",
+    "MainAgent",
 ]

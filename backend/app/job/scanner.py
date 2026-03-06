@@ -59,7 +59,7 @@ async def _scan_once() -> None:
     try:
         waiting = db.query(TbJob).filter(TbJob.status == "waiting").order_by(TbJob.id.asc()).all()
         for job in waiting:
-            job_type = job.type or "agent"
+            job_type = job.type or "agents"
             max_concurrent = get_job_max_concurrent(job_type)
             running_count = _get_running_count_by_type(db, job_type)
             if running_count >= max_concurrent:
@@ -93,9 +93,9 @@ def start_job_scanner() -> None:
     task = loop.create_task(_scan_loop())
     _background_tasks.append(task)
     default_limit = settings.JOB_MAX_CONCURRENT_DEFAULT
-    agent_limit = get_job_max_concurrent("agent")
+    agent_limit = get_job_max_concurrent("agents")
     logger.info(
-        "作业扫描器已启动，间隔 %s 秒，并行度默认 %s，agent=%s",
+        "作业扫描器已启动，间隔 %s 秒，并行度默认 %s，agents=%s",
         SCAN_INTERVAL_SECONDS,
         default_limit,
         agent_limit,

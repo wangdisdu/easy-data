@@ -243,9 +243,6 @@ frontend/.env.*.local
 .langsmith/
 .langchain/
 
-# Milvus data
-milvus_data/
-
 # Redis dumps
 dump.rdb
 

@@ -14,7 +14,6 @@ Easy Data 革命性地改变了数据分析的交互模式。用户所有操作�
 - **认证**: JWT
 - **AI Agent**: LangGraph + LangChain
 - **数据库**: SQLite / PostgreSQL / MySQL
-- **向量数据库**: Milvus
 
 ### 前端
 - **框架**: Vue 3 + TypeScript

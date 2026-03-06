@@ -23,7 +23,6 @@
 **数据存储：**
 
 - **主数据库**：Sqlite、Postgresql、Mysql
-- **向量数据库**：Milvus
 
 ### 1.2 前端技术选型
 

@@ -155,7 +155,7 @@ class TbJob(BaseModel):
 
     __tablename__ = "tb_job"
 
-    type = Column(String(255), nullable=False, comment="作业类型: agent 等")
+    type = Column(String(255), nullable=False, comment="作业类型: agents 等")
     status = Column(
         String(255),
         nullable=False,

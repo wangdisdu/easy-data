@@ -4,6 +4,7 @@
 """
 
 import json
+from collections.abc import AsyncIterator
 from typing import Annotated, Any, Optional, TypedDict
 
 from langchain_core.messages import BaseMessage, HumanMessage
@@ -11,8 +12,7 @@ from langgraph.graph import END, StateGraph
 from langgraph.graph.message import add_messages
 from sqlalchemy.orm import Session
 
-from app.agent.agent_utils import setup_langsmith_tracing
-from app.agent.base_agent import BaseAgent
+from app.agent.agent_utils import astream_workflow, create_session
 from app.core.biz_error import BizError, BizErrorCode
 from app.core.logging import get_logger
 from app.dao.models import TbAgent
@@ -33,9 +33,6 @@ from app.service.agent_service import (
 
 logger = get_logger(__name__)
 
-# 在模块加载时设置 LangSmith 追踪
-setup_langsmith_tracing()
-
 
 # 固定的状态定义
 class AgentState(TypedDict):
@@ -47,7 +44,7 @@ class AgentState(TypedDict):
     data: dict[str, Any]
 
 
-class AgentExecutor(BaseAgent):
+class AgentExecutor:
     """智能体执行器"""
 
     def __init__(self, db: Session, agent_id: int, user_id: Optional[int] = None):
@@ -58,9 +55,7 @@ class AgentExecutor(BaseAgent):
             agent_id: 智能体ID
             user_id: 用户ID
         """
-        # 调用父类初始化
-        super().__init__(user_id=user_id)
-
+        self.user_id = user_id
         self.db = db
         self.agent_id = agent_id
 
@@ -70,6 +65,11 @@ class AgentExecutor(BaseAgent):
         self.node_map: dict[int, AgentGraphNodeModel] = {}
         self.node_name_map: dict[int, str] = {}
         self.graph: Optional[Any] = None
+        self.workflow = None
+        self.has_subgraphs = False
+
+    def create_session(self) -> str:
+        return create_session()
 
     def _load_agent_data(self) -> None:
         """加载智能体数据"""
@@ -179,12 +179,12 @@ class AgentExecutor(BaseAgent):
         self.graph = workflow.compile()
         print(self.graph.get_graph().draw_mermaid())
 
-        # 设置 workflow 供 BaseAgent 使用
         self.workflow = self.graph
-
-        # 检查是否有子图节点
         self.has_subgraphs = any(node.node_type == "subgraph" for node in self.graph_data.nodes)
         return self.graph
+
+    def _get_workflow_config(self) -> dict[str, Any]:
+        return {}
 
     def _build_initial_state(self, session_id: str, message: str) -> dict[str, Any]:
         """构建初始状态
@@ -202,6 +202,17 @@ class AgentExecutor(BaseAgent):
             "user_id": self.user_id,
             "data": {},
         }
+
+    async def astream(self, session_id: str, message: str) -> AsyncIterator[dict[str, Any]]:
+        """流式处理用户消息，委托 agent_utils.astream_workflow。"""
+        initial_state = self._build_initial_state(session_id, message)
+        async for chunk in astream_workflow(
+            self.workflow,
+            initial_state,
+            config=self._get_workflow_config(),
+            has_subgraphs=self.has_subgraphs,
+        ):
+            yield chunk
 
     def build(self):
         """构建执行器（加载数据和工作流），返回编译后的图。

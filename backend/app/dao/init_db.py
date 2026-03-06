@@ -151,7 +151,7 @@ def init_agents() -> bool:
             db.add(TbAgentEdge(**{**row, **meta}))
         db.commit()
         logger.info(
-            "智能体初始化成功：agent %d 条，node %d 条，edge %d 条",
+            "智能体初始化成功：agents %d 条，node %d 条，edge %d 条",
             len(AGENT_ROWS),
             len(AGENT_NODE_ROWS),
             len(AGENT_EDGE_ROWS),

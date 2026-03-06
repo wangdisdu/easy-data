@@ -47,8 +47,6 @@ dependencies = [
     "langgraph==1.0.10",
     "langsmith==0.7.9",
     "deepagents==0.4.4",
-    # 向量数据库
-    "pymilvus==2.4.0",
     # 工具类
     "python-dotenv==1.0.1",
     "redis==5.2.0",
@@ -240,7 +238,6 @@ module = [
     "langgraph.*",
     "langsmith.*",
     "deepagents.*",
-    "pymilvus.*",
     "cx_Oracle.*",
     "clickhouse_connect.*",
 ]

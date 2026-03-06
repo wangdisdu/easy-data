@@ -62,22 +62,6 @@ def json_dumps(obj: Any, **kwargs) -> str:
     return json.dumps(converted_obj, **kwargs)
 
 
-def json_loads(s: str, **kwargs) -> Any:
-    """
-    将JSON字符串反序列化为Python对象
-
-    这是 json.loads 的简单封装，保持接口一致性
-
-    Args:
-        s: JSON字符串
-        **kwargs: 传递给 json.loads 的其他参数
-
-    Returns:
-        Any: Python对象
-    """
-    return json.loads(s, **kwargs)
-
-
 def normalize_query_result(value: Any) -> Any:
     """
     规范化查询结果中的值，处理特殊类型

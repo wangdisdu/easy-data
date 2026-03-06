@@ -2,7 +2,13 @@
 应用配置
 """
 
+from pathlib import Path
+
 from pydantic_settings import BaseSettings
+
+# 项目 home 目录
+EASY_HOME: Path = Path(__file__).resolve().parent.parent.parent
+APP_HOME: Path = EASY_HOME / "app"
 
 
 class Settings(BaseSettings):
@@ -38,7 +44,7 @@ class Settings(BaseSettings):
 
     # 作业执行并行度：按类型配置同时运行上限，未单独配置的类型使用 JOB_MAX_CONCURRENT_DEFAULT
     JOB_MAX_CONCURRENT_DEFAULT: int = 3
-    JOB_MAX_CONCURRENT_AGENT: int | None = None  # agent 类型独立上限，不设则用 DEFAULT
+    JOB_MAX_CONCURRENT_AGENT: int | None = None  # agents 类型独立上限，不设则用 DEFAULT
 
     model_config = {"env_file": ".env", "case_sensitive": True}
 

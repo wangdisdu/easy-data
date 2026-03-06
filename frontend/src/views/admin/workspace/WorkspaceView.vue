@@ -59,9 +59,9 @@ import { getWorkspaces, createWorkspace, updateWorkspace, deleteWorkspace } from
 
 const columns = [
   { title: 'ID', dataIndex: 'id', key: 'id', width: 80 },
-  { title: '编码', dataIndex: 'code', key: 'code' },
-  { title: '名称', dataIndex: 'name', key: 'name' },
-  { title: '描述', dataIndex: 'description', key: 'description' },
+  { title: '编码', dataIndex: 'code', key: 'code', ellipsis: true },
+  { title: '名称', dataIndex: 'name', key: 'name', ellipsis: true },
+  { title: '描述', dataIndex: 'description', key: 'description', ellipsis: true },
   { title: '操作', key: 'action', width: 150 },
 ]
 

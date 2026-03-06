@@ -140,8 +140,8 @@ import { getWorkspaces } from '@/api/workspace'
 
 const columns = [
   { title: 'ID', dataIndex: 'id', key: 'id', width: 60 },
-  { title: '编码', dataIndex: 'code', key: 'code', width: 200 },
-  { title: '名称', dataIndex: 'name', key: 'name', width: 200 },
+  { title: '编码', dataIndex: 'code', key: 'code', width: 200, ellipsis: true },
+  { title: '名称', dataIndex: 'name', key: 'name', width: 200, ellipsis: true },
   { title: '数据库类型', dataIndex: 'platform', key: 'platform', width: 100 },
   { title: '操作', key: 'action', width: 160 },
 ]

@@ -12,7 +12,6 @@ Easy Data 后端服务，基于 FastAPI 构建的 RESTful API 服务，提供自
 - **密码加密**: passlib[bcrypt]
 - **AI Agent**: LangChain + LangGraph
 - **数据库**: SQLite / PostgreSQL / MySQL
-- **向量数据库**: Milvus (pymilvus)
 - **缓存**: Redis
 - **WebSocket**: websockets
 
@@ -124,10 +123,6 @@ CORS_ORIGINS=["http://localhost:5173"]
 REDIS_HOST=localhost
 REDIS_PORT=6379
 REDIS_DB=0
-
-# Milvus配置（可选）
-MILVUS_HOST=localhost
-MILVUS_PORT=19530
 
 # LLM配置
 OPENAI_API_KEY=your-openai-api-key

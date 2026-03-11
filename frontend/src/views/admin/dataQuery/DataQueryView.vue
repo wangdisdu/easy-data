@@ -16,6 +16,9 @@
               @change="handleDataSourceChange"
               :loading="loadingDataSources"
             >
+              <a-select-option :value="SYSTEM_DATA_SOURCE_ID">
+                系统库
+              </a-select-option>
               <a-select-option
                 v-for="ds in dataSources"
                 :key="ds.id"
@@ -98,7 +101,16 @@ import {
   InsertRowLeftOutlined,
   PlayCircleOutlined
 } from '@ant-design/icons-vue'
-import { getDataSources, getDataSourceTables, getTableStructure, executeSqlQuery } from '@/api/dataSource'
+import {
+  getDataSources,
+  getDataSourceTables,
+  getTableStructure,
+  executeSqlQuery,
+  SYSTEM_DATA_SOURCE_ID,
+  getSystemTables,
+  getSystemTableStructure,
+  executeSystemSql
+} from '@/api/dataSource'
 import type { DataSource } from '@/api/dataSource'
 
 interface TreeNode {
@@ -114,7 +126,7 @@ interface TreeNode {
 
 const dataSources = ref<DataSource[]>([])
 const loadingDataSources = ref(false)
-const selectedDataSourceId = ref<number | null>(null)
+const selectedDataSourceId = ref<number | string>(SYSTEM_DATA_SOURCE_ID)
 const treeData = ref<TreeNode[]>([])
 const expandedKeys = ref<string[]>([])
 const selectedKeys = ref<string[]>([])
@@ -138,7 +150,7 @@ const loadDataSources = async () => {
 }
 
 // 数据源改变时加载表和视图
-const handleDataSourceChange = async (dataSourceId: number | null) => {
+const handleDataSourceChange = async (dataSourceId: number | string | null) => {
   if (!dataSourceId) {
     treeData.value = []
     selectedKeys.value = []
@@ -147,13 +159,46 @@ const handleDataSourceChange = async (dataSourceId: number | null) => {
     return
   }
 
+  if (dataSourceId === SYSTEM_DATA_SOURCE_ID) {
+    try {
+      const response = await getSystemTables()
+      const { tables = [], views = [] } = response.data || {}
+      const children: TreeNode[] = []
+      tables.forEach((tableName: string) => {
+        children.push({
+          title: tableName,
+          key: `table-${SYSTEM_DATA_SOURCE_ID}-${tableName}`,
+          type: 'table',
+          isLeaf: false,
+          tableName,
+        })
+      })
+      views.forEach((viewName: string) => {
+        children.push({
+          title: viewName,
+          key: `view-${SYSTEM_DATA_SOURCE_ID}-${viewName}`,
+          type: 'view',
+          isLeaf: false,
+          tableName: viewName,
+        })
+      })
+      treeData.value = children
+      selectedKeys.value = []
+      expandedKeys.value = []
+      sqlQuery.value = ''
+    } catch (error: any) {
+      message.error('加载系统库表列表失败')
+      treeData.value = []
+    }
+    return
+  }
+
   try {
-    const response = await getDataSourceTables(dataSourceId)
+    const response = await getDataSourceTables(dataSourceId as number)
     const { tables = [], views = [] } = response.data || {}
 
     const children: TreeNode[] = []
 
-    // 添加表节点
     tables.forEach((tableName: string) => {
       children.push({
         title: tableName,
@@ -164,7 +209,6 @@ const handleDataSourceChange = async (dataSourceId: number | null) => {
       })
     })
 
-    // 添加视图节点
     views.forEach((viewName: string) => {
       children.push({
         title: viewName,
@@ -190,8 +234,10 @@ const loadTableStructure = async (node: TreeNode) => {
   if (!selectedDataSourceId.value || !node.tableName) return
 
   try {
-    const response = await getTableStructure(selectedDataSourceId.value, node.tableName)
-    const structure = response.data || []
+    const structure =
+      selectedDataSourceId.value === SYSTEM_DATA_SOURCE_ID
+        ? (await getSystemTableStructure(node.tableName)).data || []
+        : (await getTableStructure(selectedDataSourceId.value as number, node.tableName)).data || []
 
     const children: TreeNode[] = structure.map((field: any) => ({
       title: `${field.field_name} (${field.data_type})`,
@@ -200,7 +246,6 @@ const loadTableStructure = async (node: TreeNode) => {
       isLeaf: true
     }))
 
-    // 更新节点
     const updateNode = (nodes: TreeNode[]): boolean => {
       for (const n of nodes) {
         if (n.key === node.key) {
@@ -271,11 +316,12 @@ const handleExecuteSql = async () => {
   resultColumns.value = []
 
   try {
-    const response = await executeSqlQuery(selectedDataSourceId.value, sqlQuery.value)
-    const results = response.data || []
+    const results =
+      selectedDataSourceId.value === SYSTEM_DATA_SOURCE_ID
+        ? (await executeSystemSql(sqlQuery.value)).data || []
+        : (await executeSqlQuery(selectedDataSourceId.value as number, sqlQuery.value)).data || []
 
     if (results.length > 0) {
-      // 从第一条结果中提取列名
       const firstRow = results[0]
       resultColumns.value = Object.keys(firstRow).map(key => ({
         title: key,
@@ -304,8 +350,10 @@ const handleClearSql = () => {
   sqlError.value = ''
 }
 
-onMounted(() => {
-  loadDataSources()
+onMounted(async () => {
+  await loadDataSources()
+  selectedDataSourceId.value = SYSTEM_DATA_SOURCE_ID
+  await handleDataSourceChange(SYSTEM_DATA_SOURCE_ID)
 })
 </script>
 

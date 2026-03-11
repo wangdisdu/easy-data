@@ -91,3 +91,23 @@ export const executeSqlQuery = (dataSourceId: number, sql: string, params?: Reco
   })
 }
 
+/** 数据查询页「系统库」固定选项的 id，与业务数据源（number）区分 */
+export const SYSTEM_DATA_SOURCE_ID = 'system' as const
+
+// 系统库：获取表列表
+export const getSystemTables = () => {
+  return request.get<{ data: { tables: string[]; views: string[] } }>('/system/tables')
+}
+
+// 系统库：执行 SQL
+export const executeSystemSql = (sql: string) => {
+  return request.post<{ data: Record<string, any>[] }>('/system/execute-sql', { sql })
+}
+
+// 系统库：获取表结构
+export const getSystemTableStructure = (tableName: string) => {
+  return request.get<{ data: Array<{ field_name: string; data_type: string; is_nullable?: boolean; is_primary_key?: boolean }> }>(
+    `/system/tables/${encodeURIComponent(tableName)}/structure`
+  )
+}
+

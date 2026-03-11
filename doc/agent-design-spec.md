@@ -11,7 +11,7 @@
 | **AGENT.md** | 是 | 智能体设定：名字、描述、能力范围等。作为智能体的系统提示词使用。 |
 | **MEMORY.md** | 否 | 智能体长期记忆的静态文件，用于补充上下文。 |
 | **skills/** | 否 | 技能目录，内含各 SKILL 子目录。不定义则智能体无 skill 能力。 |
-| **TOOLS.json** | 否 | 智能体需要的系统工具列表。JSON 数组格式，如 `["tool_execute_system_sql", "tool_test_data_source_setting"]`。不定义则无系统工具。 |
+| **TOOLS.json** | 否 | 智能体需要的系统工具列表。JSON 数组格式，如 `["tool_execute_sql_on_system_db", "tool_test_data_source_setting"]`。不定义则无系统工具。 |
 | **SUB_AGENTS.json** | 否 | 多智能体协作时声明子智能体。JSON 数组格式，如 `["admin", "text_to_sql"]`。子智能体的 AGENT.md 内容作为其描述信息。 |
 
 ## 3. 文件说明
@@ -34,7 +34,7 @@
 - **格式**：JSON 数组，元素为工具名称字符串。
 - **示例**：
   ```json
-  ["tool_execute_system_sql", "tool_test_data_source_setting", "tool_check_data_source_connection"]
+  ["tool_execute_sql_on_system_db", "tool_test_data_source_setting", "tool_check_data_source_connection"]
   ```
 - **可选**：不定义或空数组表示无系统工具。工具名称需与项目代码中注册的名称一致。
 

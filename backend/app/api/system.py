@@ -142,7 +142,6 @@ async def execute_system_sql(
 
         if first_token == "SELECT":
             rows = result.fetchall()
-            keys = list(rows[0]._mapping.keys()) if rows else []
             data = [dict(row._mapping) for row in rows]
             return Resp(data=data)
         # INSERT / UPDATE / DELETE

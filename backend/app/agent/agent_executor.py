@@ -12,7 +12,7 @@ from langgraph.graph import END, StateGraph
 from langgraph.graph.message import add_messages
 from sqlalchemy.orm import Session
 
-from app.agent.agent_utils import astream_workflow, create_session
+from app.agent.agent_utils import astream_graph, create_session
 from app.core.biz_error import BizError, BizErrorCode
 from app.core.logging import get_logger
 from app.dao.models import TbAgent
@@ -183,9 +183,6 @@ class AgentExecutor:
         self.has_subgraphs = any(node.node_type == "subgraph" for node in self.graph_data.nodes)
         return self.graph
 
-    def _get_workflow_config(self) -> dict[str, Any]:
-        return {}
-
     def _build_initial_state(self, session_id: str, message: str) -> dict[str, Any]:
         """构建初始状态
 
@@ -206,11 +203,10 @@ class AgentExecutor:
     async def astream(self, session_id: str, message: str) -> AsyncIterator[dict[str, Any]]:
         """流式处理用户消息，委托 agent_utils.astream_workflow。"""
         initial_state = self._build_initial_state(session_id, message)
-        async for chunk in astream_workflow(
+        async for chunk in astream_graph(
             self.workflow,
             initial_state,
-            config=self._get_workflow_config(),
-            has_subgraphs=self.has_subgraphs,
+            subgraphs=self.has_subgraphs,
         ):
             yield chunk
 

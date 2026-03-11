@@ -11,7 +11,7 @@ ROW = {
     "name": "[admin]系统管理助手",
     "description": DESCRIPTION,
     "config": json.dumps(CONFIG) if CONFIG else "",
-    "status": "active",
+    "status": "inactive",
     "extend": "",
     "id": 5,
 }

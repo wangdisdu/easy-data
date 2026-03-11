@@ -16,7 +16,7 @@ description: 数据源级数据分析。根据数据源下的数据模型的摘�
 
 1. **确定数据源**：根据用户指定或上下文确定目标数据源（id 或 code）。若未指定，可先列出数据源供用户选择，或按 code/name 查询 `tb_data_source` 取得 id。
 2. **查询该数据源下所有模型的 summary**：  
-   使用 **tool_execute_system_sql** 执行：  
+   使用 **tool_execute_sql_on_system_db** 执行：  
    `SELECT id, name, summary FROM tb_data_model WHERE ds_id = ?`  
    （参数为数据源 id；仅允许白名单表 tb_data_model，SELECT。）
 3. **生成数据源摘要**：根据上一步结果，汇总各条 **summary** 内容，生成一段连贯的、描述该数据源下所有模型整体情况的**数据库语义说明**（建议 Markdown，简明扼要；若无 summary 可注明“暂无模型摘要”或仅列模型名）。
@@ -32,9 +32,11 @@ description: 数据源级数据分析。根据数据源下的数据模型的摘�
 
 ## 可用工具
 
-- **tool_execute_system_sql(sql)**  
+- **tool_execute_sql_on_system_db(sql)**  
   - 查询：`SELECT id, name, summary FROM tb_data_model WHERE ds_id = ?`（获取指定数据源下所有模型及其 summary）。  
   - 更新：`UPDATE tb_data_source SET semantic = ?, update_time = ? WHERE id = ?`（仅在用户要求保存时执行；仅允许白名单表及上述字段）。
+- **tool_execute_sql_on_data_source(ds_id_or_code, sql)**  
+  - 在指定数据源上执行 SELECT。**ds_id_or_code** 为数据源 id 或 code（即 **tb_data_model.ds_id** 字段对应的数据源标识）。
 
 ## 与其它 skill 的协作
 

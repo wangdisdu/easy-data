@@ -7,7 +7,7 @@ description: 数据模型管理助手。支持查询数据模型、创建数据�
 
 ## 能力
 
-通过 SQL 操作表 **tb_data_model** 实现数据模型的**增、删、改、查**。执行 SQL 使用 **tool_execute_system_sql**。**批量从数据源导入**表/视图时，使用 **tool_import_data_models_by_data_source(ds_id_or_code)**，不手写批量 INSERT。
+通过 SQL 操作表 **tb_data_model** 实现数据模型的**增、删、改、查**。执行 SQL 使用 **tool_execute_sql_on_system_db**。**批量从数据源导入**表/视图时，使用 **tool_import_data_models_by_data_source(ds_id_or_code)**，不手写批量 INSERT。
 
 ## 表 tb_data_model 字段
 
@@ -70,5 +70,5 @@ VALUES ('public.users', 'users', 'postgresql', 'table', 1, (strftime('%s','now')
 
 ## 可用工具
 
-- **tool_execute_system_sql(sql)**：对 tb_data_model 的增删改查。
+- **tool_execute_sql_on_system_db(sql)**：对 tb_data_model 的增删改查。
 - **tool_import_data_models_by_data_source(ds_id_or_code)**：从数据源批量导入表/视图为数据模型，创建时优先使用。

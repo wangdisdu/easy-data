@@ -66,9 +66,13 @@ def _rows_to_json(rows: list[Any], keys: list[str]) -> str:
 
 
 @tool
-def tool_execute_system_sql(sql: str) -> str:
+def tool_execute_sql_on_system_db(sql: str) -> str:
     """
-    在系统数据库上执行一条 SQL。
+    在系统数据库上执行一条 SQL，通常用于管理本平台系统表。
+
+    与 tool_execute_sql_on_data_source 不同：本工具操作的是**本平台系统库**，
+    仅允许对白名单系统表（如 tb_data_source、tb_data_model、tb_agent 等）执行 SELECT/INSERT/UPDATE/DELETE；
+    业务数据源的表数据探索应使用 tool_execute_sql_on_data_source。
 
     使用场景：由 SKILL 根据用户意图生成 SQL，再调用本工具执行并返回结果。
 
@@ -78,11 +82,11 @@ def tool_execute_system_sql(sql: str) -> str:
     Returns:
         str: 执行结果。SELECT 返回 JSON 数组；INSERT/UPDATE/DELETE 返回影响行数或成功说明；失败返回错误信息。
     """
-    logger.info("[TOOL-CALL] tool_execute_system_sql - sql 长度: %d", len(sql))
+    logger.info("[TOOL-CALL] tool_execute_sql_on_system_db - sql 长度: %d", len(sql))
 
     ok, err = _validate_sql(sql)
     if not ok:
-        logger.warning("[TOOL-RESULT] tool_execute_system_sql - 校验失败: %s", err)
+        logger.warning("[TOOL-RESULT] tool_execute_sql_on_system_db - 校验失败: %s", err)
         return f"SQL 校验未通过: {err}"
 
     db: Session = SessionLocal()
@@ -95,18 +99,22 @@ def tool_execute_system_sql(sql: str) -> str:
             rows = result.fetchall()
             keys = list(rows[0]._mapping.keys()) if rows else []
             out = _rows_to_json(rows, keys)
-            logger.info("[TOOL-RESULT] tool_execute_system_sql - SELECT 返回 %d 行", len(rows))
+            logger.info(
+                "[TOOL-RESULT] tool_execute_sql_on_system_db - SELECT 返回 %d 行", len(rows)
+            )
             return out
 
         # INSERT / UPDATE / DELETE
         db.commit()
         rc = result.rowcount
-        logger.info("[TOOL-RESULT] tool_execute_system_sql - %s 影响行数: %s", first_token, rc)
+        logger.info(
+            "[TOOL-RESULT] tool_execute_sql_on_system_db - %s 影响行数: %s", first_token, rc
+        )
         return f"执行成功，影响行数: {rc}"
     except Exception as e:
         db.rollback()
         msg = str(e)
-        logger.exception("[TOOL-RESULT] tool_execute_system_sql - 执行失败")
+        logger.exception("[TOOL-RESULT] tool_execute_sql_on_system_db - 执行失败")
         return f"执行失败: {msg}"
     finally:
         db.close()

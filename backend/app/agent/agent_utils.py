@@ -9,6 +9,8 @@ from collections.abc import AsyncIterator
 from typing import Any, Optional
 
 from langchain_core.messages import HumanMessage, ToolMessage
+from langchain_core.runnables import RunnableConfig
+from langgraph.graph.state import CompiledStateGraph
 
 from app.core.config import settings
 from app.core.logging import get_logger
@@ -106,27 +108,35 @@ def process_stream_chunk(
     return []
 
 
-async def astream_workflow(
-    workflow: Any,
+async def astream_graph(
+    graph: CompiledStateGraph,
     initial_state: dict[str, Any],
     *,
-    config: Optional[dict[str, Any]] = None,
-    has_subgraphs: bool = False,
+    config: RunnableConfig | None = None,
+    subgraphs: bool = False,
 ) -> AsyncIterator[dict[str, Any]]:
     """
-    对 LangGraph workflow 做流式调用，统一处理 (stream_mode, chunk) 与子图格式，
+    对 LangGraph 做流式调用，统一处理 (stream_mode, chunk) 与子图格式，
     产出 chunk 字典序列。
     """
+    run_config = dict(config) if config else {}
+    configurable = run_config.get("configurable")
+    if not isinstance(configurable, dict):
+        configurable = {}
+    thread_id = (
+        configurable.get("thread_id") or initial_state.get("session_id") or str(uuid.uuid4())
+    )
+    run_config["configurable"] = {**configurable, "thread_id": thread_id}
+
     astream_kwargs: dict[str, Any] = {
         "input": initial_state,
         "stream_mode": ["messages", "updates"],
+        "config": run_config,
+        "subgraphs": subgraphs,
     }
-    if config:
-        astream_kwargs["config"] = config
-    if has_subgraphs:
-        astream_kwargs["subgraphs"] = True
+
     try:
-        async for item in workflow.astream(**astream_kwargs):
+        async for item in graph.astream(**astream_kwargs):
             if not isinstance(item, tuple):
                 logger.warning(f"收到非预期的返回格式: {type(item)}, 值: {item}")
                 continue

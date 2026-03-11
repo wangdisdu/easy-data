@@ -1,4 +1,4 @@
 [
-  "tool_execute_system_sql",
-  "tool_execute_sql_data_source"
+  "tool_execute_sql_on_system_db",
+  "tool_execute_sql_on_data_source"
 ]

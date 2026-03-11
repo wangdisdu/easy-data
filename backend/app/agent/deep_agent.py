@@ -11,23 +11,25 @@ import json
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
 
+from deepagents.backends import CompositeBackend, StateBackend, StoreBackend
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.store.memory import InMemoryStore
+
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
 from deepagents import CompiledSubAgent, create_deep_agent
-from deepagents.backends.filesystem import FilesystemBackend
 from langchain_core.messages import HumanMessage
 from langchain_openai import ChatOpenAI
 
-from app.agent.agent_utils import astream_workflow
+from app.agent.agent_utils import astream_graph
 from app.core.config import EASY_HOME, settings
 from app.core.logging import get_logger
 from app.tool import (
     tool_check_data_source_connection,
     tool_check_models_exist_in_database,
-    tool_execute_sql_data_model,
-    tool_execute_sql_data_source,
-    tool_execute_system_sql,
+    tool_execute_sql_on_data_source,
+    tool_execute_sql_on_system_db,
     tool_import_data_models_by_data_source,
     tool_test_data_source_setting,
 )
@@ -51,9 +53,8 @@ def list_deepagents() -> list[str]:
 TOOL_REGISTRY: dict[str, object] = {
     "tool_check_data_source_connection": tool_check_data_source_connection,
     "tool_check_models_exist_in_database": tool_check_models_exist_in_database,
-    "tool_execute_sql_data_model": tool_execute_sql_data_model,
-    "tool_execute_sql_data_source": tool_execute_sql_data_source,
-    "tool_execute_system_sql": tool_execute_system_sql,
+    "tool_execute_sql_on_data_source": tool_execute_sql_on_data_source,
+    "tool_execute_sql_on_system_db": tool_execute_sql_on_system_db,
     "tool_import_data_models_by_data_source": tool_import_data_models_by_data_source,
     "tool_test_data_source_setting": tool_test_data_source_setting,
 }
@@ -151,10 +152,21 @@ class DeepAgent:
         编译 workflow：agent_doc 作为 system_prompt，memory 仅加载 MEMORY.md（若有），
         组装 skills、tools、subagents，调用 create_deep_agent。
         """
+
+        def backend(rt: Any) -> CompositeBackend:
+            return CompositeBackend(
+                default=StateBackend(rt),  # 临时存储
+                routes={"/memories/": StoreBackend(rt)},  # 持久化存储
+            )
+
+        store = InMemoryStore()
+        checkpointer = MemorySaver()
         kwargs: dict[str, Any] = {
             "model": create_llm(streaming=True),
             "system_prompt": self.agent_doc,
-            "backend": FilesystemBackend(root_dir=str(self.agent_home)),
+            "backend": backend,
+            "store": store,
+            "checkpointer": checkpointer,
         }
         mem_path = self.agent_home / "MEMORY.md"
         if mem_path.exists():
@@ -173,7 +185,6 @@ class DeepAgent:
                 )
                 for sub in self.subagents
             ]
-
         self.deep_agent = create_deep_agent(**kwargs)
         return self.deep_agent
 
@@ -193,7 +204,7 @@ class DeepAgent:
         含子智能体时启用 has_subgraphs 以推送子图流式输出。
         """
         initial_state = self._build_initial_state(session_id, message)
-        async for chunk in astream_workflow(
-            self.deep_agent, initial_state, has_subgraphs=bool(self.subagents)
+        async for chunk in astream_graph(
+            self.deep_agent, initial_state, subgraphs=bool(self.subagents)
         ):
             yield chunk

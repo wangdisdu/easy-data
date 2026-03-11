@@ -13,8 +13,8 @@ description: 数据模型数据分析助手。对单个数据模型执行 8 项�
 
 ## 执行步骤
 
-1. **获取模型信息及已有参考**：用 tool_execute_system_sql 执行 `SELECT id, code, name, platform, ds_id, semantic, summary, knowledge FROM tb_data_model WHERE id = ? OR code = ?`，得到表名、platform、ds_id 等基础信息，以及**已有的 semantic、summary、knowledge** 作为数据分析前的参考信息（用于理解既有语义/摘要/外部知识，生成报告时可与之衔接或区分）；无结果则提示模型不存在并结束。
-2. **执行 8 项分析 SQL**：按顺序调用 **tool_execute_sql_data_model(dm_id_or_code, sql)**，顺序为：structure → sample → count → time → numeric → dimension → dimension_top5 → null_ratio。每步结果作为下一步上下文。
+1. **获取模型信息及已有参考**：用 tool_execute_sql_on_system_db 执行 `SELECT id, code, name, platform, ds_id, semantic, summary, knowledge FROM tb_data_model WHERE id = ? OR code = ?`，得到表名、platform、ds_id 等基础信息，以及**已有的 semantic、summary、knowledge** 作为数据分析前的参考信息（用于理解既有语义/摘要/外部知识，生成报告时可与之衔接或区分）；无结果则提示模型不存在并结束。
+2. **执行 8 项分析 SQL**：按顺序调用 **tool_execute_sql_on_data_source(ds_id_or_code, sql)**，其中 **ds_id_or_code** 为数据源标识（即该模型所属数据源的 id 或 code，即 **tb_data_model.ds_id** 对应的数据源）。顺序为：structure → sample → count → time → numeric → dimension → dimension_top5 → null_ratio。每步结果作为下一步上下文。
 3. **生成报告**：汇总所有 SQL 结果，结合步骤 1 获取的已有 semantic、summary、knowledge 参考信息，按下方「输出格式」生成 Markdown（字段说明 + 数据总结）；可参考既有描述保持衔接或注明与本次分析结论的差异。
 
 ## 执行流程要求
@@ -225,5 +225,5 @@ SELECT 'field3' AS field_name, (COUNT(*) - COUNT(field3)) * 100.0 / total_count 
 
 ## 可用工具
 
-- **tool_execute_system_sql(sql)**：使用 sql 查询 tb_data_model 数据模型表。
-- **tool_execute_sql_data_model(dm_id_or_code, sql)**：在用户数据源上执行上述 8 项分析 SQL。
+- **tool_execute_sql_on_system_db(sql)**：使用 sql 查询 tb_data_model 数据模型表。
+- **tool_execute_sql_on_data_source(ds_id_or_code, sql)**：在指定数据源上执行上述 8 项分析 SQL。**ds_id_or_code** 为数据源 id 或 code（即该模型表 **tb_data_model.ds_id** 字段对应的数据源标识）。

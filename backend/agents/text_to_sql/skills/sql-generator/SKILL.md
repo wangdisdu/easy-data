@@ -1,6 +1,6 @@
 ---
 name: sql-generator
-description: 文本转 SQL 之 SQL 生成。专职根据已获取的数据模型详细信息（semantic、summary、knowledge、platform、ds_id 等）与用户自然语言问题，按 Text2SQL 原则生成 SELECT 语句；不执行 SQL，执行与错误重试由 sql-executor 负责。不负责获取模型列表或选模型，该部分由 data-information-exploration 负责。关键词：生成SQL、SELECT、Text2SQL、platform。
+description: TextToSQL 之 SQL 生成。专职根据已获取的数据模型详细信息（semantic、summary、knowledge、platform、ds_id 等）与用户自然语言问题，按 Text2SQL 原则生成 SELECT 语句；不执行 SQL，执行与错误重试由 sql-executor 负责。不负责获取模型列表或选模型，该部分由 data-information-exploration 负责。关键词：生成SQL、SELECT、Text2SQL、platform。
 ---
 
 # SQL 生成（Text2SQL）
@@ -118,10 +118,10 @@ WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
 
 ## 可用工具（本 skill 仅生成，不执行）
 
-- **tool_execute_system_sql(sql)**（可选）  
+- **tool_execute_sql_on_system_db(sql)**（可选）  
   - 需要数据源 code 时：`SELECT code FROM tb_data_source WHERE id = ?`（仅允许白名单表及 SELECT）。  
 
-执行 SQL 使用 **tool_execute_sql_data_source** 由 **sql-executor** skill 负责。
+执行 SQL 使用 **tool_execute_sql_on_data_source** 由 **sql-executor** skill 负责。
 
 ---
 

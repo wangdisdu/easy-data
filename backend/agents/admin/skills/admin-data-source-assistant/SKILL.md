@@ -7,7 +7,7 @@ description: 数据源管理助手。支持查询数据源、创建数据源、�
 
 ## 能力
 
-通过 SQL 操作表 **tb_data_source** 实现数据源的**增、删、改、查**。执行 SQL 使用 **tool_execute_system_sql**。
+通过 SQL 操作表 **tb_data_source** 实现数据源的**增、删、改、查**。执行 SQL 使用 **tool_execute_sql_on_system_db**。
 
 ## 表 tb_data_source 字段
 
@@ -97,5 +97,5 @@ VALUES ('sqlite01', 'SQLite - Chinook数据库', 'sqlite', '{"host":"","port":0,
 
 ## 可用工具
 
-- **tool_execute_system_sql(sql)**：执行对 tb_data_source 的增删改查。
+- **tool_execute_sql_on_system_db(sql)**：执行对 tb_data_source 的增删改查。
 - **tool_test_data_source_setting(platform, host, port, username, password, database)**：创建前必须验证连接。

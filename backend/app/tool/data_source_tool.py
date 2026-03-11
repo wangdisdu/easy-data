@@ -105,15 +105,18 @@ def tool_test_data_source_setting(
 
 
 @tool
-def tool_execute_sql_data_source(ds_id_or_code: str, sql: str) -> str:
+def tool_execute_sql_on_data_source(ds_id_or_code: str, sql: str) -> str:
     """
-    在指定数据源上执行SQL查询
+    在指定数据源上执行 SQL，通常用于探索数据源的表数据。
 
-    该工具用于在已配置的数据源上执行SQL查询语句，并返回查询结果。支持通过数据源编码（code）或数据源ID来指定数据源。
+    与 tool_execute_sql_on_system_db 不同：本工具操作的是用户配置的**业务数据源**，用于查询、探索表数据；
+    系统表（如 tb_data_model、tb_data_source）的增删改查应使用 tool_execute_sql_on_system_db。
+
+    该工具用于在已配置的数据源上执行 SQL 查询语句，并返回查询结果。支持通过数据源编码（code）或数据源 ID 来指定数据源。
 
     使用场景：
-    - 查询数据源中的数据
-    - 执行数据分析SQL语句
+    - 探索、查询数据源中的表数据
+    - 执行数据分析 SQL 语句
     - 验证数据源中的数据内容
     - 执行统计查询、聚合查询等
 
@@ -172,20 +175,20 @@ def tool_execute_sql_data_source(ds_id_or_code: str, sql: str) -> str:
 
     Example:
         通过数据源编码执行查询：
-        tool_execute_sql_data_source(
-            ds_identifier="mysql01",
+        tool_execute_sql_on_data_source(
+            ds_id_or_code="mysql01",
             sql="SELECT * FROM users LIMIT 10"
         )
 
         通过数据源ID执行查询：
-        tool_execute_sql_data_source(
-            ds_identifier="1",
+        tool_execute_sql_on_data_source(
+            ds_id_or_code="1",
             sql="SELECT COUNT(*) as total FROM orders WHERE status = 'completed'"
         )
 
         执行带条件的查询：
-        tool_execute_sql_data_source(
-            ds_identifier="postgresql01",
+        tool_execute_sql_on_data_source(
+            ds_id_or_code="postgresql01",
             sql="SELECT id, name, created_at FROM products WHERE price > 100 ORDER BY created_at DESC"
         )
 
@@ -196,7 +199,7 @@ def tool_execute_sql_data_source(ds_id_or_code: str, sql: str) -> str:
         - 如果SQL语句执行失败，会返回详细的错误信息
     """
     logger.info(
-        f"[TOOL-CALL] tool_execute_sql_data_source - {format_tool_params(ds_id_or_code=ds_id_or_code, sql=sql[:LOG_MESSAGE_TRUNCATE_LENGTH] + '...' if len(sql) > LOG_MESSAGE_TRUNCATE_LENGTH else sql)}"
+        f"[TOOL-CALL] tool_execute_sql_on_data_source - {format_tool_params(ds_id_or_code=ds_id_or_code, sql=sql[:LOG_MESSAGE_TRUNCATE_LENGTH] + '...' if len(sql) > LOG_MESSAGE_TRUNCATE_LENGTH else sql)}"
     )
     db = SessionLocal()
     try:
@@ -204,7 +207,7 @@ def tool_execute_sql_data_source(ds_id_or_code: str, sql: str) -> str:
 
         if not data_source:
             error_msg = f"数据源不存在：{ds_id_or_code}"
-            logger.error(f"[TOOL-RESULT] tool_execute_sql_data_source - 失败：{error_msg}")
+            logger.error(f"[TOOL-RESULT] tool_execute_sql_on_data_source - 失败：{error_msg}")
             return error_msg
 
         # 解析setting配置
@@ -212,7 +215,7 @@ def tool_execute_sql_data_source(ds_id_or_code: str, sql: str) -> str:
             setting = json.loads(data_source.setting)
         except json.JSONDecodeError:
             error_msg = f"数据源配置格式错误：ID={data_source.id}"
-            logger.exception("[TOOL-RESULT] tool_execute_sql_data_source - 失败")
+            logger.exception("[TOOL-RESULT] tool_execute_sql_on_data_source - 失败")
             return error_msg
 
         platform = data_source.platform
@@ -243,14 +246,14 @@ def tool_execute_sql_data_source(ds_id_or_code: str, sql: str) -> str:
             result_json = json_dumps(normalized_results, ensure_ascii=False, indent=2)
 
             logger.info(
-                f"[TOOL-RESULT] tool_execute_sql_data_source - 成功：返回 {len(results)} 条记录"
+                f"[TOOL-RESULT] tool_execute_sql_on_data_source - 成功：返回 {len(results)} 条记录"
             )
             return result_json
 
         except Exception as e:
             error_msg = f"执行SQL查询时发生错误：{e!s}"
             logger.error(
-                f"[TOOL-RESULT] tool_execute_sql_data_source - 失败：{error_msg}", exc_info=True
+                f"[TOOL-RESULT] tool_execute_sql_on_data_source - 失败：{error_msg}", exc_info=True
             )
             return error_msg
         finally:
@@ -262,7 +265,7 @@ def tool_execute_sql_data_source(ds_id_or_code: str, sql: str) -> str:
     except Exception as e:
         error_msg = f"处理SQL执行请求时发生错误：{e!s}"
         logger.error(
-            f"[TOOL-RESULT] tool_execute_sql_data_source - 失败：{error_msg}", exc_info=True
+            f"[TOOL-RESULT] tool_execute_sql_on_data_source - 失败：{error_msg}", exc_info=True
         )
         return error_msg
     finally:

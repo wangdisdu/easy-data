@@ -254,8 +254,8 @@ def __init__(self):
     self.tool_node_get_model = ToolNode([tool_get_data_model])
     
     # 节点2：执行数据分析SQL
-    self.llm_execute_sql = self.llm.bind_tools([tool_execute_sql_data_model])
-    self.tool_node_execute_sql = ToolNode([tool_execute_sql_data_model])
+    self.llm_execute_sql = self.llm.bind_tools([tool_execute_sql_on_data_source])
+    self.tool_node_execute_sql = ToolNode([tool_execute_sql_on_data_source])
     
     # 节点3：生成语义说明（不绑定工具，避免参数截断）
     self.llm_update_semantic = self.llm  # 不绑定工具，让LLM生成完整语义说明

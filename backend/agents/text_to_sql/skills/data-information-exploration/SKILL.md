@@ -17,7 +17,7 @@ description: TextToSQL数据信息分析。专职分析并获取用户问题所�
 ## 工作流程（三步）
 
 **第一步：获取所有数据模型概要**  
-通过 **tool_execute_system_sql** 执行：  
+通过 **tool_execute_sql_on_system_db** 执行：  
 `SELECT id, summary FROM tb_data_model`  
 得到所有数据模型的 id 与 summary，用于理解各模型对应的业务含义与数据范围。
 
@@ -27,7 +27,7 @@ description: TextToSQL数据信息分析。专职分析并获取用户问题所�
 - 匹配不到：判定为“不能解决”，礼貌说明当前没有与问题相关的数据模型，建议先导入数据源并生成数据模型后再提问，并可提示用户使用数据源/数据模型管理相关能力。
 
 **第三步：获取涉及模型的详细信息**  
-通过 **tool_execute_system_sql** 执行（将第二步得到的 id 列表填入 IN 子句）：  
+通过 **tool_execute_sql_on_system_db** 执行（将第二步得到的 id 列表填入 IN 子句）：  
 `SELECT id, name, platform, ds_id, semantic, summary, knowledge FROM tb_data_model WHERE id IN (id1, id2, ...)`  
 得到这些模型的 name、platform、ds_id、semantic、summary、knowledge。  
 - **交付**：将上述详细信息（及模型列表）提供给 **sql-generator** 生成 SELECT，再由 **sql-executor** 在对应数据源上执行。  
@@ -40,7 +40,7 @@ description: TextToSQL数据信息分析。专职分析并获取用户问题所�
 
 ## 可用工具
 
-- **tool_execute_system_sql(sql)**  
+- **tool_execute_sql_on_system_db(sql)**  
   - 用于查询系统表 **tb_data_model**（仅允许白名单表及 SELECT）。  
   - 第一步：`SELECT id, summary FROM tb_data_model` 获取所有模型基本信息。  
   - 第三步：`SELECT id, name, platform, ds_id, semantic, summary, knowledge FROM tb_data_model WHERE id IN (id1, id2, ...)` 获取涉及模型的详细信息；IN 中为具体 id，多个用逗号分隔。

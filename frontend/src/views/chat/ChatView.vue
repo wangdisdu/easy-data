@@ -94,10 +94,9 @@
               placeholder="输入您的问题，例如：你能做什么？"
               :auto-size="{ minRows: 2, maxRows: 6 }"
               :disabled="loading || !isConnected"
-              @keydown.enter.exact.prevent="sendMessage"
             />
             <div class="input-actions">
-              <span class="input-hint">Enter 发送 · Shift+Enter 换行</span>
+              <span v-if="!isConnected" class="input-hint">连接已断开，正在重连...</span>
               <div class="input-buttons">
                 <a-button
                   type="text"
@@ -115,9 +114,6 @@
                 </a-button>
               </div>
             </div>
-          </div>
-          <div v-if="!isConnected" class="connection-status">
-            <a-alert message="连接已断开，正在重连..." type="warning" show-icon style="margin-top: 8px" />
           </div>
         </div>
 
@@ -814,11 +810,18 @@ onUnmounted(() => {
 .input-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid #4096ff;
+  border-radius: 12px;
+  box-shadow: 0 0 0 2px rgba(5, 145, 255, 0.1);
 }
 
 .input-wrapper :deep(.ant-input) {
   resize: none;
+  border: none;
+  cursor: auto;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0);
 }
 
 .input-actions {
@@ -837,6 +840,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-left: auto;
 }
 
 .agent-option-desc {
